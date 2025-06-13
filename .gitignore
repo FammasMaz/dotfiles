@@ -1,16 +1,17 @@
-   # Sensitive files
-   *.key
-   *.pem
-   .env
-   .env.local
-   *_rsa
-   *_ed25519
-   
-   # OS files
-   .DS_Store
-   Thumbs.db
-   
-   # Temporary files
-   *.tmp
-   *.log
-   *.zcompdump
+# Sensitive files
+*.key
+*.pem
+.env
+.env.local
+*_rsa
+*_ed25519
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files and caches
+*.tmp
+*.log
+.zcompdump*
+.zsh_history

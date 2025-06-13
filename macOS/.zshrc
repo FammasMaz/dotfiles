@@ -16,21 +16,13 @@ setopt ALWAYS_TO_END
 
 export PATH="/opt/homebrew/bin:$PATH"
 
+# Cache brew prefix to avoid multiple calls
+BREW_PREFIX="/opt/homebrew"
+
 alias cat='bat'
 alias ghcp='gh copilot suggest'
 alias lsa='eza -al --icons=always --color=always --sort=date'
 alias df='duf'
-
-# Additional tools
-eval "$(zoxide init zsh)"
-eval "$(thefuck --alias)"
-eval "$(gh copilot alias -- zsh)"
-
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
-ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-eval "$(oh-my-posh init zsh --config "/opt/homebrew/opt/oh-my-posh/themes/atomic.omp.json")"
 
 # some other shit
 alias ll='ls -alF'
@@ -48,6 +40,49 @@ alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
 
+# Defer expensive initializations - only run when needed
+# Zoxide (fast directory jumping)
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
+
+# Oh-my-posh prompt (most expensive - consider alternatives)
+if command -v oh-my-posh >/dev/null 2>&1; then
+    eval "$(oh-my-posh init zsh --config "${BREW_PREFIX}/opt/oh-my-posh/themes/atomic.omp.json")"
+fi
+
+# Zsh plugins with cached paths
+if [[ -f "${BREW_PREFIX}/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "${BREW_PREFIX}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+fi
+
+if [[ -f "${BREW_PREFIX}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "${BREW_PREFIX}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
+# Lazy load thefuck and gh copilot (only when first used)
+fuck() {
+    if ! command -v thefuck >/dev/null 2>&1; then
+        echo "thefuck not found"
+        return 1
+    fi
+    eval "$(thefuck --alias)"
+    fuck "$@"
+}
+
+# Lazy load gh copilot
+ghcs() {
+    if ! command -v gh >/dev/null 2>&1; then
+        echo "gh not found"
+        return 1
+    fi
+    eval "$(gh copilot alias -- zsh)"
+    ghcs "$@"
+}
+
+# Conda initialization (optimized)
 __conda_setup="$('/Users/fammasmaz/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
@@ -60,7 +95,6 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-
 
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward

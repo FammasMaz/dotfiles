@@ -62,6 +62,13 @@ if [[ -f "${BREW_PREFIX}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.z
     source "${BREW_PREFIX}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
+if [[ -d /opt/homebrew/share/zsh/site-functions ]]; then
+    fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+fi
+
+autoload -Uz compinit
+compinit -u
+
 # Lazy load thefuck and gh copilot (only when first used)
 fuck() {
     if ! command -v thefuck >/dev/null 2>&1; then

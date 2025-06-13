@@ -39,6 +39,7 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
+alias cd='z'
 
 # Defer expensive initializations - only run when needed
 # Zoxide (fast directory jumping)

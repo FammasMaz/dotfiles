@@ -51,22 +51,22 @@ install_zsh() {
     case $distro in
         ubuntu|debian)
             sudo apt update
-            sudo apt install -y zsh curl git
+            sudo apt install -y zsh curl git zoxide
             ;;
         fedora)
-            sudo dnf install -y zsh curl git
+            sudo dnf install -y zsh curl git zoxide
             ;;
         centos|rhel)
-            sudo yum install -y zsh curl git
+            sudo yum install -y zsh curl git zoxide
             ;;
         arch|manjaro)
-            sudo pacman -S --noconfirm zsh curl git
+            sudo pacman -S --noconfirm zsh curl git zoxide
             ;;
         opensuse*)
-            sudo zypper install -y zsh curl git
+            sudo zypper install -y zsh curl git zoxide
             ;;
         alpine)
-            sudo apk add zsh curl git
+            sudo apk add zsh curl git zoxide
             ;;
         *)
             print_error "Unsupported distribution: $distro"
@@ -208,6 +208,9 @@ if command -v oh-my-posh &> /dev/null; then
     eval "$(oh-my-posh init zsh --config ~/.cache/oh-my-posh/themes/atomic.omp.json)"
 fi
 
+# Initialize zoxide
+eval "$(zoxide init zsh)"
+
 # Basic aliases
 alias ll='ls -alF'
 alias la='ls -A'
@@ -215,6 +218,7 @@ alias l='ls -CF'
 alias grep='grep --color=auto'
 alias ..='cd ..'
 alias ...='cd ../..'
+alias cd='z'
 
 # Git aliases
 alias gs='git status'

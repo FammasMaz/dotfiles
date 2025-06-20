@@ -46,29 +46,23 @@ for package in "${brew_packages[@]}"; do
     fi
 done
 
-# Install Oh My Zsh if not already installed
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "📦 Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-else
-    echo "✅ Oh My Zsh already installed"
-fi
+# Note: Oh My Zsh is no longer used - we use brew-installed plugins directly
 
-# Install zsh-autosuggestions plugin
-if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]; then
-    echo "📦 Installing zsh-autosuggestions plugin..."
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-else
-    echo "✅ zsh-autosuggestions already installed"
-fi
+# Install zsh plugins via Homebrew
+echo "📦 Installing zsh plugins..."
+zsh_plugins=(
+    "zsh-autosuggestions"
+    "zsh-syntax-highlighting"
+)
 
-# Install zsh-syntax-highlighting plugin
-if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
-    echo "📦 Installing zsh-syntax-highlighting plugin..."
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-else
-    echo "✅ zsh-syntax-highlighting already installed"
-fi
+for plugin in "${zsh_plugins[@]}"; do
+    if brew list "$plugin" &>/dev/null; then
+        echo "✅ $plugin already installed"
+    else
+        echo "📦 Installing $plugin..."
+        brew install "$plugin"
+    fi
+done
 
 # Install Miniconda3 if not already installed
 if [ ! -d "$HOME/miniconda3" ]; then
@@ -110,6 +104,22 @@ done
 
 echo "🎉 Setup complete!"
 echo ""
+# Set up .zshrc symlink
+ZDOT_PATH="$HOME/Documents/dotfiles/macOS/.zshrc"
+if [ -f "$ZDOT_PATH" ]; then
+    echo "🔗 Setting up .zshrc symlink..."
+    # Backup existing .zshrc if it exists
+    if [ -f "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
+        mv "$HOME/.zshrc" "$HOME/.zshrc.backup"
+        echo "📋 Backed up existing .zshrc to .zshrc.backup"
+    fi
+    # Create symlink
+    ln -sf "$ZDOT_PATH" "$HOME/.zshrc"
+    echo "✅ .zshrc symlinked to $ZDOT_PATH"
+else
+    echo "❌ .zshrc not found at $ZDOT_PATH"
+fi
+
 echo "📋 Next steps:"
 echo "1. Restart your terminal or run: source ~/.zshrc"
 echo "2. Authenticate with GitHub CLI: gh auth login"

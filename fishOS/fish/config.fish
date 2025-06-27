@@ -27,11 +27,10 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
-alias cd='z'
 
 # Zoxide
 if command -v zoxide >/dev/null 2>&1
-    zoxide init fish | source
+    zoxide init fish --cmd cd | source
 end
 
 # Oh My Posh
@@ -70,3 +69,7 @@ else
 end
 # <<< conda initialize <<<
 
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :

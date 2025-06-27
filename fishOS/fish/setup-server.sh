@@ -374,6 +374,7 @@ fi
 echo "📦 Installing fish plugins..."
 "$HOME/.local/bin/fish" -c "fisher install jethrokuan/z" 2>/dev/null || echo "⚠️  z plugin installation failed or already installed"
 "$HOME/.local/bin/fish" -c "fisher install PatrickF1/fzf.fish" 2>/dev/null || echo "⚠️  fzf.fish plugin installation failed or already installed"
+"$HOME/.local/bin/fish" -c "fisher install EHfive/fish-bash2env" 2>/dev/null || echo "⚠️  bass (bash2env) plugin installation failed or already installed"
 
 # Set up symlink to dotfiles directory for easy access
 if [ ! -L "$HOME/.dotfiles" ]; then

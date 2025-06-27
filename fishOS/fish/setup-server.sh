@@ -423,7 +423,14 @@ end
 
 # Environment Modules (common on HPC systems)
 if test -f "/usr/share/Modules/init/fish"
-    source /usr/share/Modules/init/fish
+    # Try to source the fish module init, but handle syntax errors gracefully
+    if not source /usr/share/Modules/init/fish 2>/dev/null
+        echo "⚠️  Environment Modules fish init has syntax errors, using bash fallback"
+        # Fallback: create a wrapper function that calls module via bash
+        function module
+            bash -c "source /usr/share/Modules/init/bash && module $argv"
+        end
+    end
 end
 
 # Conda (only if available)

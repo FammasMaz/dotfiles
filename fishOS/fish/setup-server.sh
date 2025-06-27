@@ -193,32 +193,73 @@ install_fish_binary() {
     curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-linux-$ARCH.tar.xz" -o fish.tar.xz
     
     if [ $? -ne 0 ]; then
-        echo "❌ Failed to download fish binary, trying alternative..."
-        # Try AppImage as fallback
-        curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-$ARCH.AppImage" -o fish.AppImage
-        chmod +x fish.AppImage
-        
-        # Extract AppImage
-        ./fish.AppImage --appimage-extract
-        cp squashfs-root/usr/bin/fish "$HOME/.local/bin/"
-        
-        # Copy necessary files
-        mkdir -p "$HOME/.local/share/fish"
-        cp -r squashfs-root/usr/share/fish/* "$HOME/.local/share/fish/" 2>/dev/null || true
+        echo "❌ Failed to download fish tar.xz, trying static binary..."
+        # Try downloading static binary directly
+        curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION.linux.$ARCH" -o fish-binary
+        if [ $? -eq 0 ] && [ -s fish-binary ]; then
+            chmod +x fish-binary
+            cp fish-binary "$HOME/.local/bin/fish"
+            echo "📦 Installed fish static binary"
+        else
+            echo "❌ Static binary download failed, trying AppImage..."
+            # Try AppImage as final fallback
+            curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-$ARCH.AppImage" -o fish.AppImage
+            if [ $? -eq 0 ] && [ -s fish.AppImage ]; then
+                chmod +x fish.AppImage
+                
+                # Extract AppImage
+                ./fish.AppImage --appimage-extract
+                cp squashfs-root/usr/bin/fish "$HOME/.local/bin/"
+                
+                # Copy necessary files
+                mkdir -p "$HOME/.local/share/fish"
+                cp -r squashfs-root/usr/share/fish/* "$HOME/.local/share/fish/" 2>/dev/null || true
+                echo "📦 Installed fish from AppImage"
+            else
+                echo "❌ All fish binary downloads failed"
+                return 1
+            fi
+        fi
     else
         tar -xf fish.tar.xz
-        cp fish-$FISH_VERSION-linux-$ARCH/bin/fish "$HOME/.local/bin/"
         
-        # Copy fish data files
-        mkdir -p "$HOME/.local/share/fish"
-        cp -r fish-$FISH_VERSION-linux-$ARCH/share/fish/* "$HOME/.local/share/fish/" 2>/dev/null || true
+        # List contents to see actual structure
+        echo "📋 Archive contents:"
+        ls -la
+        
+        # Find the fish binary - it might be in different locations
+        FISH_BIN=$(find . -name "fish" -type f -executable | head -1)
+        if [ -n "$FISH_BIN" ]; then
+            echo "📦 Found fish binary at: $FISH_BIN"
+            cp "$FISH_BIN" "$HOME/.local/bin/"
+            
+            # Find and copy fish data files
+            mkdir -p "$HOME/.local/share/fish"
+            FISH_SHARE=$(find . -path "*/share/fish" -type d | head -1)
+            if [ -n "$FISH_SHARE" ]; then
+                echo "📦 Found fish data at: $FISH_SHARE"
+                cp -r "$FISH_SHARE"/* "$HOME/.local/share/fish/" 2>/dev/null || true
+            fi
+        else
+            echo "❌ Could not find fish binary in archive"
+            echo "📋 Archive structure:"
+            find . -type f -name "*fish*"
+            return 1
+        fi
     fi
     
     # Clean up
     cd /
     rm -rf "$TEMP_DIR"
     
-    echo "✅ Fish binary installed to ~/.local/bin/fish"
+    # Verify the installation
+    if [ -f "$HOME/.local/bin/fish" ] && [ -x "$HOME/.local/bin/fish" ]; then
+        echo "✅ Fish binary installed to ~/.local/bin/fish"
+        return 0
+    else
+        echo "❌ Fish binary installation failed - file not found or not executable"
+        return 1
+    fi
 }
 
 # Function to install fish from source (fallback)

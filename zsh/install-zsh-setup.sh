@@ -205,7 +205,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Initialize oh-my-posh with atomic theme
 if command -v oh-my-posh &> /dev/null; then
-    eval "$(oh-my-posh init zsh --config ~/.cache/oh-my-posh/themes/atomic.omp.json)"
+    eval "$(oh-my-posh init zsh --config $HOME/.dotfiles/themes/atomic.omp.json)"
 fi
 
 # Initialize zoxide
@@ -249,17 +249,24 @@ setup_oh_my_posh_themes() {
     # Get the directory where this script is located
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
-    # Copy the atomic theme from the script directory if it exists
-    if [ -f "$SCRIPT_DIR/atomic.omp.json" ]; then
-        cp "$SCRIPT_DIR/atomic.omp.json" ~/.cache/oh-my-posh/themes/atomic.omp.json
-        print_status "Copied atomic.omp.json theme from dotfiles directory"
+    # Set up symlink to dotfiles directory for easy access
+    if [ ! -L "$HOME/.dotfiles" ]; then
+        ln -sf "$SCRIPT_DIR/.." "$HOME/.dotfiles"
+        print_status "Created symlink to dotfiles directory at ~/.dotfiles"
+    fi
+    
+    # Copy the atomic theme from the themes directory if it exists
+    if [ -f "$SCRIPT_DIR/../themes/atomic.omp.json" ]; then
+        # Also copy to cache for backward compatibility
+        cp "$SCRIPT_DIR/../themes/atomic.omp.json" ~/.cache/oh-my-posh/themes/atomic.omp.json
+        print_status "Copied atomic.omp.json theme from themes directory"
     else
-        print_warning "atomic.omp.json not found in script directory, downloading agnoster theme as fallback"
+        print_warning "atomic.omp.json not found in themes directory, downloading agnoster theme as fallback"
         curl -s https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/agnoster.omp.json -o ~/.cache/oh-my-posh/themes/atomic.omp.json
     fi
     
     print_status "oh-my-posh theme setup complete!"
-    print_status "Using atomic theme as default"
+    print_status "Using atomic theme from ~/.dotfiles/themes/atomic.omp.json as default"
     print_status "You can change themes by modifying the oh-my-posh config line in ~/.zshrc"
     print_status "Available themes: https://ohmyposh.dev/docs/themes"
 }
@@ -308,7 +315,7 @@ main() {
     print_status "Next steps:"
     echo "  1. Log out and log back in (or restart your terminal)"
     echo "  2. Your new shell will be zsh with autosuggestions and syntax highlighting"
-    echo "  3. oh-my-posh is configured with the agnoster theme"
+    echo "  3. oh-my-posh is configured with the atomic theme"
     echo "  4. You can customize your setup by editing ~/.zshrc"
     echo
     print_status "To test immediately, run: exec zsh"

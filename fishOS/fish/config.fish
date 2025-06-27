@@ -35,7 +35,7 @@ end
 
 # Oh My Posh
 if command -v oh-my-posh >/dev/null 2>&1
-    oh-my-posh init fish --config "/opt/homebrew/opt/oh-my-posh/themes/atomic.omp.json" | source
+    oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" | source
 end
 
 # OrbStack

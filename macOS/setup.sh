@@ -34,7 +34,6 @@ brew_packages=(
     "zoxide"        # Smart cd command
     "thefuck"       # Command correction tool
     "gh"            # GitHub CLI
-    "oh-my-posh"    # Prompt theme engine
 )
 
 for package in "${brew_packages[@]}"; do
@@ -92,7 +91,7 @@ echo "You may want to authenticate with GitHub CLI by running: gh auth login"
 
 # Verify installations
 echo "🔍 Verifying installations..."
-commands_to_check=("bat" "eza" "duf" "zoxide" "thefuck" "gh" "oh-my-posh")
+commands_to_check=("bat" "eza" "duf" "zoxide" "thefuck" "gh")
 
 for cmd in "${commands_to_check[@]}"; do
     if command -v "$cmd" &> /dev/null; then
@@ -128,4 +127,3 @@ echo ""
 echo "💡 Note: Some tools may require additional configuration:"
 echo "   - Run 'thefuck --alias' to see fuck alias setup"
 echo "   - Run 'zoxide --help' to learn about z command usage"
-echo "   - The atomic.omp.json theme should be available at /opt/homebrew/opt/oh-my-posh/themes/"

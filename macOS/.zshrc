@@ -49,7 +49,7 @@ fi
 
 # Oh-my-posh prompt (most expensive - consider alternatives)
 if command -v oh-my-posh >/dev/null 2>&1; then
-    eval "$(oh-my-posh init zsh --config "${BREW_PREFIX}/opt/oh-my-posh/themes/atomic.omp.json")"
+    eval "$(oh-my-posh init zsh --config "$HOME/.dotfiles/themes/atomic.omp.json")"
 fi
 
 # Zsh plugins with cached paths

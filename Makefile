@@ -3,13 +3,14 @@ SHELL := /bin/bash
 # Get the directory where this Makefile is located
 DOTFILES_DIR := $(shell pwd)
 
-.PHONY: help zsh fish linux
+.PHONY: help zsh fish linux fish-server
 
 help:
 	@echo "Please use \`make <target>\` where <target> is one of the following:"
-	@echo "  zsh    - installs the zsh configuration (macOS)"
-	@echo "  fish   - installs the fish shell configuration"
-	@echo "  linux  - installs the linux configuration"
+	@echo "  zsh         - installs the zsh configuration (macOS)"
+	@echo "  fish        - installs the fish shell configuration"
+	@echo "  fish-server - installs fish configuration for servers (no sudo, ~/.local install)"
+	@echo "  linux       - installs the linux configuration"
 
 zsh:
 	@echo "Installing zsh configuration..."
@@ -22,3 +23,7 @@ linux:
 fish:
 	@echo "Installing fish shell configuration..."
 	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup.sh
+
+fish-server:
+	@echo "Installing fish shell configuration for server (no sudo)..."
+	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup-server.sh

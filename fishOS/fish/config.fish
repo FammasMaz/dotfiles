@@ -44,6 +44,11 @@ if test -f ~/.orbstack/shell/init.fish
     source ~/.orbstack/shell/init.fish
 end
 
+# Environment Modules (common on HPC systems)
+if test -f "/usr/share/Modules/init/fish"
+    source /usr/share/Modules/init/fish
+end
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 set -g conda_auto_activate_base false

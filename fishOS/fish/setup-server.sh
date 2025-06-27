@@ -421,6 +421,11 @@ if test -f "$HOME/.dotfiles/themes/atomic.omp.json"
     oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" | source
 end
 
+# Environment Modules (common on HPC systems)
+if test -f "/usr/share/Modules/init/fish"
+    source /usr/share/Modules/init/fish
+end
+
 # Conda (only if available)
 if test -f "$HOME/miniconda3/bin/conda"
     eval "$HOME/miniconda3/bin/conda" "shell.fish" "hook" $argv | source

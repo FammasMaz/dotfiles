@@ -36,9 +36,9 @@ echo "📦 Installing common dependencies..."
 # List of packages for different distributions
 declare -A packages
 packages=(
-    [apt-get]="bat exa duf zoxide thefuck gh zsh-autosuggestions zsh-syntax-highlighting fish"
-    [dnf]="bat exa duf zoxide thefuck gh zsh-autosuggestions zsh-syntax-highlighting fish"
-    [pacman]="bat exa duf zoxide thefuck gh zsh-autosuggestions zsh-syntax-highlighting fish"
+    [apt-get]="bat eza duf zoxide thefuck gh zsh-autosuggestions zsh-syntax-highlighting fish"
+    [dnf]="bat eza duf zoxide thefuck gh zsh-autosuggestions zsh-syntax-highlighting fish"
+    [pacman]="bat eza duf zoxide thefuck gh zsh-autosuggestions zsh-syntax-highlighting fish"
 )
 
 # Install packages
@@ -60,12 +60,17 @@ if ! command -v oh-my-posh &> /dev/null; then
 fi
 
 # Install GitHub Copilot CLI extension
-echo "📦 Installing GitHub Copilot CLI extension..."
-if gh extension list | grep -q "github/gh-copilot"; then
-    echo "✅ GitHub Copilot CLI extension already installed"
+echo "📦 Setting up GitHub Copilot CLI extension..."
+if gh auth status &> /dev/null; then
+    if gh extension list | grep -q "github/gh-copilot"; then
+        echo "✅ GitHub Copilot CLI extension already installed"
+    else
+        echo "📦 Installing GitHub Copilot CLI extension..."
+        gh extension install github/gh-copilot
+    fi
 else
-    echo "📦 Installing GitHub Copilot CLI extension..."
-    gh extension install github/gh-copilot
+    echo "⚠️  GitHub CLI not authenticated. Skipping GitHub Copilot CLI extension installation."
+    echo "💡 After setup, run 'gh auth login' and then 'gh extension install github/gh-copilot'"
 fi
 
 
@@ -118,4 +123,5 @@ echo ""
 echo "📋 Next steps:"
 echo "1. Restart your terminal or run: source ~/.zshrc"
 echo "2. Authenticate with GitHub CLI: gh auth login"
-echo "3. GitHub Copilot CLI extension is now installed and ready to use with 'gh copilot suggest'"
+echo "3. Install GitHub Copilot CLI extension: gh extension install github/gh-copilot"
+echo "4. GitHub Copilot CLI extension will be ready to use with 'gh copilot suggest'"

@@ -9,7 +9,12 @@ set -x PATH "/opt/homebrew/bin" $PATH
 set -x PATH "$HOME/.local/bin" $PATH
 
 # Aliases
-alias cat='bat'
+# if macos use bat else batcat
+if test (uname) = "Darwin"
+    alias cat='bat'
+else
+    alias cat='batcat'
+end
 alias ghcp='gh copilot suggest'
 alias lsa='eza -al --icons=always --color=always --sort=date'
 alias df='duf'
@@ -19,7 +24,7 @@ alias l='ls -CF'
 alias grep='grep --color=auto'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ls='eza -al --icons=always --color=always --sort=newest'
+alias ls='eza -al --icons=always --color=always --sort=date'
 
 # Git aliases
 alias gs='git status'

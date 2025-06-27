@@ -54,7 +54,9 @@ done
 # Install Oh My Posh
 if ! command -v oh-my-posh &> /dev/null; then
     echo "📦 Installing Oh My Posh..."
-    curl -s https://ohmyposh.dev/install.sh | sudo bash -s
+    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+    # Add to PATH for current session
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 

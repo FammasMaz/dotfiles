@@ -6,11 +6,7 @@ set -g fish_greeting ""
 
 # Environment variables
 set -x PATH "/opt/homebrew/bin" $PATH
-
-# if on linux 
-if [ "$OSTYPE" = "linux-gnu" ]
-    set -x PATH "/home/fammasmaz/.local/bin" $PATH
-end
+set -x PATH "$HOME/.local/bin" $PATH
 
 # Aliases
 alias cat='bat'

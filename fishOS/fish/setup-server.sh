@@ -187,63 +187,72 @@ install_fish_binary() {
     TEMP_DIR=$(mktemp -d)
     cd "$TEMP_DIR"
     
-    # Download fish binary
-    FISH_VERSION="3.7.1"
-    echo "📥 Downloading fish $FISH_VERSION binary..."
-    curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-linux-$ARCH.tar.xz" -o fish.tar.xz
+    # Download fish static binary
+    FISH_VERSION="4.0.2"
+    echo "📥 Downloading fish $FISH_VERSION static binary..."
     
-    if [ $? -ne 0 ]; then
-        echo "❌ Failed to download fish tar.xz, trying static binary..."
-        # Try downloading static binary directly
-        curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION.linux.$ARCH" -o fish-binary
-        if [ $? -eq 0 ] && [ -s fish-binary ]; then
+    # Try static binary first (these are the experimental static builds)
+    # Try different naming conventions for static builds
+    STATIC_URLS=(
+        "fish-static-linux-$ARCH"
+        "fish-static-$ARCH"
+        "fish-$FISH_VERSION-linux-$ARCH"
+        "fish-linux-$ARCH"
+    )
+    
+    STATIC_SUCCESS=false
+    for url_suffix in "${STATIC_URLS[@]}"; do
+        echo "📥 Trying: $url_suffix"
+        curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/$url_suffix" -o fish-binary
+        if [ $? -eq 0 ] && [ -s fish-binary ] && [ $(wc -c < fish-binary) -gt 1000 ]; then
             chmod +x fish-binary
             cp fish-binary "$HOME/.local/bin/fish"
-            echo "📦 Installed fish static binary"
-        else
-            echo "❌ Static binary download failed, trying AppImage..."
-            # Try AppImage as final fallback
-            curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-$ARCH.AppImage" -o fish.AppImage
-            if [ $? -eq 0 ] && [ -s fish.AppImage ]; then
-                chmod +x fish.AppImage
+            echo "📦 Installed fish static binary from: $url_suffix"
+            STATIC_SUCCESS=true
+            break
+        fi
+    done
+    
+    if [ "$STATIC_SUCCESS" = true ]; then
+        echo "✅ Static binary installation successful"
+    else
+        echo "❌ Static binary download failed, trying source archive..."
+        # Try downloading and building from source archive
+        curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION.tar.xz" -o fish.tar.xz
+        if [ $? -eq 0 ] && [ -s fish.tar.xz ]; then
+            # Check if we can extract it
+            if tar -tf fish.tar.xz >/dev/null 2>&1; then
+                tar -xf fish.tar.xz
                 
-                # Extract AppImage
-                ./fish.AppImage --appimage-extract
-                cp squashfs-root/usr/bin/fish "$HOME/.local/bin/"
+                # List contents to see actual structure
+                echo "📋 Archive contents:"
+                ls -la
                 
-                # Copy necessary files
-                mkdir -p "$HOME/.local/share/fish"
-                cp -r squashfs-root/usr/share/fish/* "$HOME/.local/share/fish/" 2>/dev/null || true
-                echo "📦 Installed fish from AppImage"
+                # Find the fish binary - it might be in different locations
+                FISH_BIN=$(find . -name "fish" -type f -executable | head -1)
+                if [ -n "$FISH_BIN" ]; then
+                    echo "📦 Found fish binary at: $FISH_BIN"
+                    cp "$FISH_BIN" "$HOME/.local/bin/"
+                    
+                    # Find and copy fish data files
+                    mkdir -p "$HOME/.local/share/fish"
+                    FISH_SHARE=$(find . -path "*/share/fish" -type d | head -1)
+                    if [ -n "$FISH_SHARE" ]; then
+                        echo "📦 Found fish data at: $FISH_SHARE"
+                        cp -r "$FISH_SHARE"/* "$HOME/.local/share/fish/" 2>/dev/null || true
+                    fi
+                else
+                    echo "❌ Could not find fish binary in archive - this is a source archive, not binary"
+                    echo "📋 Archive structure:"
+                    find . -type f -name "*fish*" | head -10
+                    return 1
+                fi
             else
-                echo "❌ All fish binary downloads failed"
+                echo "❌ Downloaded file is not a valid tar archive"
                 return 1
             fi
-        fi
-    else
-        tar -xf fish.tar.xz
-        
-        # List contents to see actual structure
-        echo "📋 Archive contents:"
-        ls -la
-        
-        # Find the fish binary - it might be in different locations
-        FISH_BIN=$(find . -name "fish" -type f -executable | head -1)
-        if [ -n "$FISH_BIN" ]; then
-            echo "📦 Found fish binary at: $FISH_BIN"
-            cp "$FISH_BIN" "$HOME/.local/bin/"
-            
-            # Find and copy fish data files
-            mkdir -p "$HOME/.local/share/fish"
-            FISH_SHARE=$(find . -path "*/share/fish" -type d | head -1)
-            if [ -n "$FISH_SHARE" ]; then
-                echo "📦 Found fish data at: $FISH_SHARE"
-                cp -r "$FISH_SHARE"/* "$HOME/.local/share/fish/" 2>/dev/null || true
-            fi
         else
-            echo "❌ Could not find fish binary in archive"
-            echo "📋 Archive structure:"
-            find . -type f -name "*fish*"
+            echo "❌ All fish download methods failed"
             return 1
         fi
     fi

@@ -15,58 +15,66 @@ mkdir -p "$HOME/.local/bin"
 mkdir -p "$HOME/.local/share"
 mkdir -p "$HOME/.config/fish"
 
-# Function to install bat from source
+# Function to install bat
 install_bat() {
     if [ -f "$HOME/.local/bin/bat" ]; then
         echo "✅ bat already installed locally"
         return
     fi
     
-    echo "📦 Installing bat from source..."
+    echo "📦 Installing bat..."
     
-    # Check if rust is available
-    if ! command -v cargo &> /dev/null; then
-        echo "📦 Installing Rust..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source "$HOME/.cargo/env"
-    fi
+    # Detect architecture
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) ARCH="x86_64" ;;
+        aarch64) ARCH="aarch64" ;;
+        armv7l) ARCH="arm" ;;
+        *) echo "❌ Unsupported architecture: $ARCH"; return ;;
+    esac
     
+    # Get latest version
+    LATEST=$(curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+    
+    # Download and install
     TEMP_DIR=$(mktemp -d)
     cd "$TEMP_DIR"
-    
-    git clone https://github.com/sharkdp/bat.git
-    cd bat
-    cargo build --release
-    cp target/release/bat "$HOME/.local/bin/"
+    curl -L "https://github.com/sharkdp/bat/releases/download/v$LATEST/bat-v${LATEST}-${ARCH}-unknown-linux-musl.tar.gz" -o bat.tar.gz
+    tar -xzf bat.tar.gz
+    cp "bat-v${LATEST}-${ARCH}-unknown-linux-musl/bat" "$HOME/.local/bin/"
     
     cd /
     rm -rf "$TEMP_DIR"
     echo "✅ bat installed"
 }
 
-# Function to install eza from source
+# Function to install eza
 install_eza() {
     if [ -f "$HOME/.local/bin/eza" ]; then
         echo "✅ eza already installed locally"
         return
     fi
     
-    echo "📦 Installing eza from source..."
+    echo "📦 Installing eza..."
     
-    # Check if rust is available
-    if ! command -v cargo &> /dev/null; then
-        echo "📦 Installing Rust..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source "$HOME/.cargo/env"
-    fi
+    # Detect architecture
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) ARCH="x86_64" ;;
+        aarch64) ARCH="aarch64" ;;
+        armv7l) ARCH="armv7" ;;
+        *) echo "❌ Unsupported architecture: $ARCH"; return ;;
+    esac
     
+    # Get latest version
+    LATEST=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+    
+    # Download and install
     TEMP_DIR=$(mktemp -d)
     cd "$TEMP_DIR"
-    
-    git clone https://github.com/eza-community/eza.git
-    cd eza
-    cargo build --release
-    cp target/release/eza "$HOME/.local/bin/"
+    curl -L "https://github.com/eza-community/eza/releases/download/v$LATEST/eza_${ARCH}-unknown-linux-musl.tar.gz" -o eza.tar.gz
+    tar -xzf eza.tar.gz
+    cp eza "$HOME/.local/bin/"
     
     cd /
     rm -rf "$TEMP_DIR"
@@ -106,14 +114,27 @@ install_zoxide() {
     
     echo "📦 Installing zoxide..."
     
-    # Check if rust is available
-    if ! command -v cargo &> /dev/null; then
-        echo "📦 Installing Rust..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source "$HOME/.cargo/env"
-    fi
+    # Detect architecture
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) ARCH="x86_64" ;;
+        aarch64) ARCH="aarch64" ;;
+        armv7l) ARCH="armv7" ;;
+        *) echo "❌ Unsupported architecture: $ARCH"; return ;;
+    esac
     
-    cargo install zoxide --root "$HOME/.local"
+    # Get latest version
+    LATEST=$(curl -s https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+    
+    # Download and install
+    TEMP_DIR=$(mktemp -d)
+    cd "$TEMP_DIR"
+    curl -L "https://github.com/ajeetdsouza/zoxide/releases/download/v$LATEST/zoxide-$LATEST-$ARCH-unknown-linux-musl.tar.gz" -o zoxide.tar.gz
+    tar -xzf zoxide.tar.gz
+    cp zoxide "$HOME/.local/bin/"
+    
+    cd /
+    rm -rf "$TEMP_DIR"
     echo "✅ zoxide installed"
 }
 
@@ -150,9 +171,66 @@ install_duf() {
     echo "✅ duf installed"
 }
 
-# Function to install fish from source
+# Function to install fish binary
+install_fish_binary() {
+    echo "📦 Installing fish binary to ~/.local/..."
+    
+    # Detect architecture
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) ARCH="x86_64" ;;
+        aarch64) ARCH="aarch64" ;;
+        *) echo "❌ Unsupported architecture: $ARCH"; return 1 ;;
+    esac
+    
+    # Create temporary directory
+    TEMP_DIR=$(mktemp -d)
+    cd "$TEMP_DIR"
+    
+    # Download fish binary
+    FISH_VERSION="3.7.1"
+    echo "📥 Downloading fish $FISH_VERSION binary..."
+    curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-linux-$ARCH.tar.xz" -o fish.tar.xz
+    
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to download fish binary, trying alternative..."
+        # Try AppImage as fallback
+        curl -L "https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-$ARCH.AppImage" -o fish.AppImage
+        chmod +x fish.AppImage
+        
+        # Extract AppImage
+        ./fish.AppImage --appimage-extract
+        cp squashfs-root/usr/bin/fish "$HOME/.local/bin/"
+        
+        # Copy necessary files
+        mkdir -p "$HOME/.local/share/fish"
+        cp -r squashfs-root/usr/share/fish/* "$HOME/.local/share/fish/" 2>/dev/null || true
+    else
+        tar -xf fish.tar.xz
+        cp fish-$FISH_VERSION-linux-$ARCH/bin/fish "$HOME/.local/bin/"
+        
+        # Copy fish data files
+        mkdir -p "$HOME/.local/share/fish"
+        cp -r fish-$FISH_VERSION-linux-$ARCH/share/fish/* "$HOME/.local/share/fish/" 2>/dev/null || true
+    fi
+    
+    # Clean up
+    cd /
+    rm -rf "$TEMP_DIR"
+    
+    echo "✅ Fish binary installed to ~/.local/bin/fish"
+}
+
+# Function to install fish from source (fallback)
 install_fish_from_source() {
     echo "📦 Installing fish from source to ~/.local/..."
+    
+    # Check if we have required build tools
+    if ! command -v cmake &> /dev/null || ! command -v make &> /dev/null || ! command -v gcc &> /dev/null; then
+        echo "❌ Required build tools not found (cmake, make, gcc)"
+        echo "Cannot build from source without these tools"
+        return 1
+    fi
     
     # Create temporary directory for building
     TEMP_DIR=$(mktemp -d)
@@ -182,19 +260,22 @@ install_fish_from_source() {
 if [ -f "$HOME/.local/bin/fish" ]; then
     echo "✅ fish already installed locally"
 else
-    # Check if we have required build tools
-    if ! command -v cmake &> /dev/null || ! command -v make &> /dev/null || ! command -v gcc &> /dev/null; then
-        echo "❌ Required build tools not found (cmake, make, gcc)"
-        echo "Please ask your system administrator to install: cmake make gcc g++"
-        exit 1
+    # Try to install fish binary first
+    if install_fish_binary; then
+        echo "✅ Fish binary installation successful"
+    else
+        echo "⚠️  Binary installation failed, trying source build..."
+        if install_fish_from_source; then
+            echo "✅ Fish source build successful"
+        else
+            echo "❌ Both binary and source installation failed"
+            echo "Fish installation unsuccessful, but continuing with enhanced tools..."
+        fi
     fi
-    
-    install_fish_from_source
 fi
 
-# Update PATH to include local bin and cargo
+# Update PATH to include local bin
 export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
 
 # Install enhanced tools
 echo "🔧 Installing enhanced tools locally..."
@@ -240,7 +321,7 @@ set -U fish_history_size 10000
 set -g fish_greeting ""
 
 # Environment variables - Server specific paths
-set -x PATH "$HOME/.local/bin" "$HOME/.cargo/bin" $PATH
+set -x PATH "$HOME/.local/bin" $PATH
 
 # Aliases
 alias cat='bat'
@@ -314,8 +395,8 @@ fi
 echo "🎉 Fish shell server setup complete!"
 echo ""
 echo "📋 Next steps:"
-echo "1. Add ~/.local/bin and ~/.cargo/bin to your PATH in ~/.bashrc or ~/.profile:"
-echo "   echo 'export PATH=\"\$HOME/.local/bin:\$HOME/.cargo/bin:\$PATH\"' >> ~/.bashrc"
+echo "1. Add ~/.local/bin to your PATH in ~/.bashrc or ~/.profile:"
+echo "   echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
 echo "2. To use fish as your default shell (if allowed), run:"
 echo "   chsh -s \$HOME/.local/bin/fish"
 echo "3. Or simply start fish manually: ~/.local/bin/fish"
@@ -323,4 +404,5 @@ echo ""
 echo "📁 Fish binary: $HOME/.local/bin/fish"
 echo "📁 Configuration: $HOME/.config/fish/config.fish"
 echo "📁 Enhanced tools: ~/.local/bin/{bat,eza,oh-my-posh,zoxide,duf}"
+echo "🚀 All tools installed as pre-compiled binaries - no build tools required!"
 echo "📁 Dotfiles link: $HOME/.dotfiles"

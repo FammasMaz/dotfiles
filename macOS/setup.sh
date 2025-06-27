@@ -5,6 +5,10 @@
 
 set -e  # Exit on any error
 
+# Get the absolute path of the dotfiles directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 echo "🚀 Starting macOS setup for .zshrc dependencies..."
 
 # Check if Homebrew is installed, install if not
@@ -103,8 +107,15 @@ done
 
 echo "🎉 Setup complete!"
 echo ""
+
+# Set up dotfiles symlink for easy access
+if [ ! -L "$HOME/.dotfiles" ]; then
+    ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
+    echo "✅ Created symlink to dotfiles directory at ~/.dotfiles"
+fi
+
 # Set up .zshrc symlink
-ZDOT_PATH="$HOME/.dotfiles/macOS/.zshrc"
+ZDOT_PATH="$DOTFILES_DIR/macOS/.zshrc"
 if [ -f "$ZDOT_PATH" ]; then
     echo "🔗 Setting up .zshrc symlink..."
     # Backup existing .zshrc if it exists

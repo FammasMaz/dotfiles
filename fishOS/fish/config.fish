@@ -7,6 +7,11 @@ set -g fish_greeting ""
 # Environment variables
 set -x PATH "/opt/homebrew/bin" $PATH
 
+# if on linux 
+if [ "$OSTYPE" = "linux-gnu" ]
+    set -x PATH "/home/fammasmaz/.local/bin" $PATH
+end
+
 # Aliases
 alias cat='bat'
 alias ghcp='gh copilot suggest'
@@ -46,13 +51,13 @@ end
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 set -g conda_auto_activate_base false
-if test -f /Users/fammasmaz/miniconda3/bin/conda
-    eval /Users/fammasmaz/miniconda3/bin/conda "shell.fish" "hook" $argv | source
+if test -f "$HOME/miniconda3/bin/conda"
+    eval "$HOME/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
 else
-    if test -f "/Users/fammasmaz/miniconda3/etc/fish/conf.d/conda.fish"
-        . "/Users/fammasmaz/miniconda3/etc/fish/conf.d/conda.fish"
+    if test -f "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
+        . "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
     else
-        set -x PATH "/Users/fammasmaz/miniconda3/bin" $PATH
+        set -x PATH "$HOME/miniconda3/bin" $PATH
     end
 end
 # <<< conda initialize <<<

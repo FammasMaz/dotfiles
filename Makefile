@@ -20,7 +20,7 @@ linux:
 	@echo "Installing linux configuration..."
 	@cd $(DOTFILES_DIR) && ./linuxOS/setup.sh
 
-macos:
+mac:
 	@echo "Installing fish shell configuration..."
 	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup.sh
 

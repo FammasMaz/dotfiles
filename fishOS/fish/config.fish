@@ -66,6 +66,8 @@ end
 set -g conda_auto_activate_base false
 if test -f "$HOME/miniconda3/bin/conda"
     eval "$HOME/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
+else if test -f "/opt/homebrew/bin/conda"
+    eval "/opt/homebrew/bin/conda" "shell.fish" "hook" $argv | source
 else
     if test -f "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
         . "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
@@ -73,7 +75,6 @@ else
         set -x PATH "$HOME/miniconda3/bin" $PATH
     end
 end
-# <<< conda initialize <<<
 
 
 # Added by OrbStack: command-line tools and integration

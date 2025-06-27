@@ -19,6 +19,7 @@ alias l='ls -CF'
 alias grep='grep --color=auto'
 alias ..='cd ..'
 alias ...='cd ../..'
+alias ls='eza -al --icons=always --color=always --sort=newest'
 
 # Git aliases
 alias gs='git status'

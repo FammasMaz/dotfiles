@@ -89,6 +89,15 @@ else
     echo "✅ Miniconda3 already installed"
 fi
 
+# Install GitHub Copilot CLI extension
+echo "📦 Installing GitHub Copilot CLI extension..."
+if gh extension list | grep -q "github/gh-copilot"; then
+    echo "✅ GitHub Copilot CLI extension already installed"
+else
+    echo "📦 Installing GitHub Copilot CLI extension..."
+    gh extension install github/gh-copilot
+fi
+
 # Setup GitHub CLI authentication (optional)
 echo "🔐 Setting up GitHub CLI..."
 echo "You may want to authenticate with GitHub CLI by running: gh auth login"
@@ -104,6 +113,13 @@ for cmd in "${commands_to_check[@]}"; do
         echo "❌ $cmd is not available"
     fi
 done
+
+# Check GitHub Copilot CLI extension
+if gh extension list | grep -q "github/gh-copilot"; then
+    echo "✅ GitHub Copilot CLI extension is available"
+else
+    echo "❌ GitHub Copilot CLI extension is not available"
+fi
 
 echo "🎉 Setup complete!"
 echo ""
@@ -133,7 +149,7 @@ fi
 echo "📋 Next steps:"
 echo "1. Restart your terminal or run: source ~/.zshrc"
 echo "2. Authenticate with GitHub CLI: gh auth login"
-echo "3. If you want to enable GitHub Copilot CLI: gh extension install github/gh-copilot"
+echo "3. GitHub Copilot CLI extension is now installed and ready to use with 'gh copilot suggest'"
 echo ""
 echo "💡 Note: Some tools may require additional configuration:"
 echo "   - Run 'thefuck --alias' to see fuck alias setup"

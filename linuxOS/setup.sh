@@ -59,6 +59,15 @@ if ! command -v oh-my-posh &> /dev/null; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
+# Install GitHub Copilot CLI extension
+echo "📦 Installing GitHub Copilot CLI extension..."
+if gh extension list | grep -q "github/gh-copilot"; then
+    echo "✅ GitHub Copilot CLI extension already installed"
+else
+    echo "📦 Installing GitHub Copilot CLI extension..."
+    gh extension install github/gh-copilot
+fi
+
 
 # Install Miniconda3 if not already installed
 if [ ! -d "$HOME/miniconda3" ]; then
@@ -109,4 +118,4 @@ echo ""
 echo "📋 Next steps:"
 echo "1. Restart your terminal or run: source ~/.zshrc"
 echo "2. Authenticate with GitHub CLI: gh auth login"
-echo "3. If you want to enable GitHub Copilot CLI: gh extension install github/gh-copilot"
+echo "3. GitHub Copilot CLI extension is now installed and ready to use with 'gh copilot suggest'"

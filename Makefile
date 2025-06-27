@@ -20,10 +20,10 @@ linux:
 	@echo "Installing linux configuration..."
 	@cd $(DOTFILES_DIR) && ./linuxOS/setup.sh
 
-fish:
+macos:
 	@echo "Installing fish shell configuration..."
 	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup.sh
 
-fish-server:
+server:
 	@echo "Installing fish shell configuration for server (no sudo)..."
 	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup-server.sh

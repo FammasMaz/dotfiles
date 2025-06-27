@@ -205,12 +205,19 @@ install_fish_binary() {
             echo "📦 Found static fish binary at: $FISH_BIN"
             cp "$FISH_BIN" "$HOME/.local/bin/"
             
-            # Copy fish data files if they exist
+            # For static builds, we need to run fish --install to set up data files
+            echo "📦 Setting up fish data files..."
             mkdir -p "$HOME/.local/share/fish"
-            FISH_SHARE=$(find . -path "*/share/fish" -type d | head -1)
-            if [ -n "$FISH_SHARE" ]; then
-                echo "📦 Found fish data at: $FISH_SHARE"
-                cp -r "$FISH_SHARE"/* "$HOME/.local/share/fish/" 2>/dev/null || true
+            if "$HOME/.local/bin/fish" --install="$HOME/.local/share/fish"; then
+                echo "✅ Fish data files installed successfully"
+            else
+                echo "⚠️  Fish --install failed, copying manual data files..."
+                # Try to copy any data files from the static build
+                FISH_SHARE=$(find . -path "*/share/fish" -type d | head -1)
+                if [ -n "$FISH_SHARE" ]; then
+                    echo "📦 Found fish data at: $FISH_SHARE"
+                    cp -r "$FISH_SHARE"/* "$HOME/.local/share/fish/" 2>/dev/null || true
+                fi
             fi
             # Clean up and return success
             cd /
@@ -436,21 +443,36 @@ if [ -f "$HOME/.zsh_history" ]; then
     # Create fish history directory if it doesn't exist
     mkdir -p "$HOME/.local/share/fish"
     
-    # Create a temporary directory for the conversion tool
-    TEMP_DIR=$(mktemp -d)
-    cd "$TEMP_DIR"
-    
-    # Clone the conversion tool
-    git clone https://github.com/thenktor/zsh-history-to-fish.git
-    cd zsh-history-to-fish
-    
-    # Empty the fish_history file and convert
-    > "$HOME/.local/share/fish/fish_history"
-    ./zsh-fish.sh -i "$HOME/.zsh_history" -o "$HOME/.local/share/fish/fish_history"
-    
-    # Clean up temporary directory
-    cd /
-    rm -rf "$TEMP_DIR"
+    # Check if we have the tools needed for conversion
+    if command -v git &> /dev/null; then
+        # Create a temporary directory for the conversion tool
+        TEMP_DIR=$(mktemp -d)
+        cd "$TEMP_DIR"
+        
+        # Clone the conversion tool
+        if git clone https://github.com/thenktor/zsh-history-to-fish.git; then
+            cd zsh-history-to-fish
+            
+            # Check if the conversion script requires zsh
+            if command -v zsh &> /dev/null; then
+                # Empty the fish_history file and convert
+                > "$HOME/.local/share/fish/fish_history"
+                ./zsh-fish.sh -i "$HOME/.zsh_history" -o "$HOME/.local/share/fish/fish_history"
+                echo "✅ Zsh history converted successfully"
+            else
+                echo "⚠️  zsh not found, skipping history conversion"
+                echo "ℹ️  You can manually convert your zsh history later"
+            fi
+        else
+            echo "⚠️  Failed to clone history conversion tool, skipping"
+        fi
+        
+        # Clean up temporary directory
+        cd /
+        rm -rf "$TEMP_DIR"
+    else
+        echo "⚠️  git not found, skipping zsh history conversion"
+    fi
 else
     echo "ℹ️  No zsh history found to convert"
 fi

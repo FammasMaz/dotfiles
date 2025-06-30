@@ -316,36 +316,217 @@ restore_conda_environments() {
     
     log_step "Restoring conda environments from $backup_dir..."
     
-    # Find all .yml files in backup directory
-    for yml_file in "$backup_dir"/*.yml; do
-        if [ -f "$yml_file" ]; then
+    # Set up logging directory
+    local log_dir="$backup_dir/logs"
+    mkdir -p "$log_dir"
+    
+    # Detect timeout command
+    local timeout_cmd
+    timeout_cmd=$(find_timeout_command)
+    if [ -z "$timeout_cmd" ]; then
+        log_warning "Timeout command not found. Conda operations may hang indefinitely."
+        log_warning "On macOS, install with: brew install coreutils"
+    fi
+    
+    # Configuration
+    local conda_timeout_seconds=1800  # 30 minutes
+    
+    # Find all .spec.txt files (prioritize exact restoration)
+    local environments_restored=0
+    local environments_failed=0
+    
+    for spec_file in "$backup_dir"/*.spec.txt; do
+        if [ -f "$spec_file" ]; then
             local env_name
-            env_name=$(basename "$yml_file" .yml)
+            env_name=$(basename "$spec_file" .spec.txt)
             
-            log_info "Restoring environment: $env_name"
+            restore_single_environment "$backup_dir" "$conda_path" "$env_name" "$log_dir" "$timeout_cmd" "$conda_timeout_seconds"
             
-            # Try to create environment from yml file
-            if "$conda_path" env create -f "$yml_file" >/dev/null 2>&1; then
-                log_success "Restored $env_name"
+            if [ $? -eq 0 ]; then
+                ((environments_restored++))
             else
-                log_warning "Failed to restore $env_name from .yml, trying .spec.txt"
-                
-                # Fallback to spec file if yml fails
-                local spec_file="$backup_dir/${env_name}.spec.txt"
-                if [ -f "$spec_file" ]; then
-                    if "$conda_path" create --name "$env_name" --file "$spec_file" >/dev/null 2>&1; then
-                        log_success "Restored $env_name from spec file"
-                    else
-                        log_error "Failed to restore $env_name from both .yml and .spec.txt"
-                    fi
-                else
-                    log_error "No spec file found for $env_name"
-                fi
+                ((environments_failed++))
             fi
         fi
     done
     
+    # Summary
+    echo ""
     log_success "Environment restoration completed"
+    log_info "Restored: $environments_restored environments"
+    if [ $environments_failed -gt 0 ]; then
+        log_warning "Failed: $environments_failed environments"
+        log_info "Check logs in: $log_dir"
+    fi
+}
+
+# Helper function to find timeout command
+find_timeout_command() {
+    if command -v gtimeout &> /dev/null; then
+        echo "gtimeout"
+    elif command -v timeout &> /dev/null; then
+        echo "timeout"
+    else
+        echo ""
+    fi
+}
+
+# Restore a single environment with three-tier strategy
+restore_single_environment() {
+    local backup_dir="$1"
+    local conda_path="$2"
+    local env_name="$3"
+    local log_dir="$4"
+    local timeout_cmd="$5"
+    local timeout_seconds="$6"
+    
+    local spec_file="$backup_dir/${env_name}.spec.txt"
+    local yml_file="$backup_dir/${env_name}.yml"
+    local restoration_log="$log_dir/${env_name}-restore.log"
+    
+    log_info "Restoring environment: $env_name"
+    log_debug "Progress logged to: $restoration_log"
+    
+    # Clear previous log
+    > "$restoration_log"
+    
+    # Tier 1: Restore from spec.txt (most precise)
+    if restore_from_spec_file "$conda_path" "$env_name" "$spec_file" "$restoration_log" "$timeout_cmd" "$timeout_seconds"; then
+        log_success "Restored $env_name from spec file (exact versions)"
+        validate_environment "$conda_path" "$env_name"
+        return 0
+    fi
+    
+    # Tier 2: Restore from environment.yml (flexible versions)
+    if [ -f "$yml_file" ]; then
+        if restore_from_yml_file "$conda_path" "$yml_file" "$restoration_log" "$timeout_cmd" "$timeout_seconds"; then
+            log_success "Restored $env_name from environment.yml (compatible versions)"
+            validate_environment "$conda_path" "$env_name"
+            return 0
+        fi
+    fi
+    
+    # Tier 3: Restore with flexible versions (last resort)
+    if restore_with_flexible_versions "$conda_path" "$env_name" "$yml_file" "$restoration_log" "$timeout_cmd" "$timeout_seconds"; then
+        log_success "Restored $env_name with flexible versions (versions may differ)"
+        log_warning "⚠️  Package versions in $env_name may differ from the original"
+        validate_environment "$conda_path" "$env_name"
+        return 0
+    fi
+    
+    # All tiers failed
+    log_error "Failed to restore $env_name from all available methods"
+    log_error "Manual restoration may be needed. Check: $restoration_log"
+    return 1
+}
+
+# Tier 1: Restore from spec file
+restore_from_spec_file() {
+    local conda_path="$1"
+    local env_name="$2"
+    local spec_file="$3"
+    local log_file="$4"
+    local timeout_cmd="$5"
+    local timeout_seconds="$6"
+    
+    if [ ! -f "$spec_file" ]; then
+        return 1
+    fi
+    
+    log_debug "Attempting spec file restoration for $env_name..."
+    echo "=== Tier 1: Spec file restoration ===" >> "$log_file"
+    
+    if [ -n "$timeout_cmd" ]; then
+        "$timeout_cmd" "$timeout_seconds" "$conda_path" create --name "$env_name" --file "$spec_file" --yes 2>&1 | tee -a "$log_file"
+    else
+        "$conda_path" create --name "$env_name" --file "$spec_file" --yes 2>&1 | tee -a "$log_file"
+    fi
+}
+
+# Tier 2: Restore from environment.yml
+restore_from_yml_file() {
+    local conda_path="$1"
+    local yml_file="$2"
+    local log_file="$3"
+    local timeout_cmd="$4"
+    local timeout_seconds="$5"
+    
+    log_debug "Attempting environment.yml restoration..."
+    echo "=== Tier 2: Environment.yml restoration ===" >> "$log_file"
+    
+    if [ -n "$timeout_cmd" ]; then
+        "$timeout_cmd" "$timeout_seconds" "$conda_path" env create -f "$yml_file" --yes 2>&1 | tee -a "$log_file"
+    else
+        "$conda_path" env create -f "$yml_file" --yes 2>&1 | tee -a "$log_file"
+    fi
+}
+
+# Tier 3: Restore with flexible versions
+restore_with_flexible_versions() {
+    local conda_path="$1"
+    local env_name="$2"
+    local yml_file="$3"
+    local log_file="$4"
+    local timeout_cmd="$5"
+    local timeout_seconds="$6"
+    
+    if [ ! -f "$yml_file" ]; then
+        return 1
+    fi
+    
+    log_debug "Attempting flexible version restoration for $env_name..."
+    echo "=== Tier 3: Flexible version restoration ===" >> "$log_file"
+    
+    # Create flexible yml by removing version constraints
+    local flexible_yml="/tmp/${env_name}_flexible.yml"
+    create_flexible_yml "$yml_file" "$flexible_yml"
+    
+    if [ -n "$timeout_cmd" ]; then
+        "$timeout_cmd" "$timeout_seconds" "$conda_path" env create -f "$flexible_yml" --yes 2>&1 | tee -a "$log_file"
+    else
+        "$conda_path" env create -f "$flexible_yml" --yes 2>&1 | tee -a "$log_file"
+    fi
+    
+    # Cleanup
+    rm -f "$flexible_yml"
+}
+
+# Create a flexible environment.yml with version constraints removed
+create_flexible_yml() {
+    local original_yml="$1"
+    local flexible_yml="$2"
+    
+    # Copy the header and remove version constraints from dependencies
+    awk '
+    /^dependencies:/ { in_deps = 1 }
+    in_deps && /^  - / { 
+        # Remove version constraints (everything after = or >)
+        gsub(/[>=<].*/, "")
+        print
+        next
+    }
+    !in_deps || !/^  - / { 
+        if (!/^  - /) in_deps = 0
+        print 
+    }
+    ' "$original_yml" > "$flexible_yml"
+}
+
+# Validate a restored environment
+validate_environment() {
+    local conda_path="$1"
+    local env_name="$2"
+    
+    log_debug "Validating environment: $env_name"
+    
+    # Test if environment exists and has basic functionality
+    if "$conda_path" run -n "$env_name" python --version >/dev/null 2>&1; then
+        log_debug "✓ $env_name validation successful (Python available)"
+    elif "$conda_path" run -n "$env_name" echo "test" >/dev/null 2>&1; then
+        log_debug "✓ $env_name validation successful (environment functional)"
+    else
+        log_warning "⚠️  $env_name validation failed - environment may be broken"
+    fi
 }
 
 prompt_conda_migration() {

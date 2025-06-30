@@ -1,0 +1,21 @@
+# Linux packages for Fedora/RHEL (dnf/yum)
+# One package per line, comments start with #
+
+# Build tools
+gcc
+gcc-c++
+make
+cmake
+
+# Development libraries
+openssl-devel
+libffi-devel
+python3-devel
+python3-pip
+
+# System utilities
+xclip
+xsel
+
+# Additional Fedora packages
+util-linux-user

@@ -1,0 +1,28 @@
+# Common packages for all platforms
+# One package per line, comments start with #
+
+# Essential command-line tools
+git
+curl
+fish
+zsh
+
+# Modern command-line replacements
+bat
+eza
+duf
+zoxide
+thefuck
+
+# Development tools
+gh
+neovim
+
+# File operations and utilities
+tree
+htop
+jq
+
+# Network tools
+wget
+rsync

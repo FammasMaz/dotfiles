@@ -1,0 +1,15 @@
+# macOS-specific packages (Homebrew)
+# One package per line, comments start with #
+
+# Python environment
+miniconda
+
+# Zsh plugins (available via Homebrew on macOS)
+zsh-autosuggestions
+zsh-syntax-highlighting
+
+# macOS-specific development tools
+mas
+
+# Additional macOS utilities
+reattach-to-user-namespace

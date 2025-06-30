@@ -126,20 +126,49 @@ ghcs() {
     ghcs "$@"
 }
 
-# Conda initialization (if installed)
-if [[ -f "$HOME/miniconda3/bin/conda" ]]; then
-    __conda_setup="$('$HOME/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+# Cross-platform conda initialization
+# Try conda locations in order of preference
+conda_locations=(
+    "/opt/homebrew/Caskroom/miniconda/base/bin/conda"  # Homebrew macOS
+    "$HOME/miniconda3/bin/conda"                       # Standard miniconda
+    "$HOME/anaconda3/bin/conda"                        # Standard anaconda
+    "/usr/local/miniconda3/bin/conda"                  # System miniconda
+    "/usr/local/anaconda3/bin/conda"                   # System anaconda
+)
+
+conda_path=""
+conda_base=""
+
+# Find first available conda installation
+for location in "${conda_locations[@]}"; do
+    if [[ -f "$location" ]]; then
+        conda_path="$location"
+        conda_base="$(dirname "$(dirname "$location")")"
+        break
+    fi
+done
+
+# If no specific installation found, try conda in PATH
+if [[ -z "$conda_path" ]] && command -v conda >/dev/null 2>&1; then
+    conda_path="$(command -v conda)"
+    conda_base="$(dirname "$(dirname "$conda_path")")"
+fi
+
+# Initialize conda if found
+if [[ -n "$conda_path" ]]; then
+    __conda_setup="$('$conda_path' 'shell.zsh' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
         eval "$__conda_setup"
     else
-        if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-            . "$HOME/miniconda3/etc/profile.d/conda.sh"
+        if [ -f "$conda_base/etc/profile.d/conda.sh" ]; then
+            . "$conda_base/etc/profile.d/conda.sh"
         else
-            export PATH="$HOME/miniconda3/bin:$PATH"
+            export PATH="$conda_base/bin:$PATH"
         fi
     fi
     unset __conda_setup
 fi
+unset conda_locations conda_path conda_base
 
 # Better history search
 bindkey '^[[A' history-search-backward

@@ -64,16 +64,42 @@ end
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 set -g conda_auto_activate_base false
-if test -f "$HOME/miniconda3/bin/conda"
-    eval "$HOME/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
-else if test -f "/opt/homebrew/bin/conda"
-    eval "/opt/homebrew/bin/conda" "shell.fish" "hook" $argv | source
-else
-    if test -f "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
-        . "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
-    else
-        set -x PATH "$HOME/miniconda3/bin" $PATH
+
+# Cross-platform conda detection (in order of preference)
+set -l conda_locations \
+    "/opt/homebrew/Caskroom/miniconda/base/bin/conda" \
+    "$HOME/miniconda3/bin/conda" \
+    "$HOME/anaconda3/bin/conda" \
+    "/usr/local/miniconda3/bin/conda" \
+    "/usr/local/anaconda3/bin/conda"
+
+set -l conda_path ""
+set -l conda_base ""
+
+# Find first available conda installation
+for location in $conda_locations
+    if test -f "$location"
+        set conda_path "$location"
+        set conda_base (dirname (dirname "$location"))
+        break
     end
+end
+
+# If no specific installation found, try conda in PATH
+if test -z "$conda_path"
+    if command -v conda >/dev/null 2>&1
+        set conda_path (command -v conda)
+        set conda_base (dirname (dirname "$conda_path"))
+    end
+end
+
+# Initialize conda if found
+if test -n "$conda_path"
+    eval "$conda_path" "shell.fish" "hook" $argv | source
+else if test -f "$conda_base/etc/fish/conf.d/conda.fish"
+    . "$conda_base/etc/fish/conf.d/conda.fish"
+else if test -n "$conda_base"
+    set -x PATH "$conda_base/bin" $PATH
 end
 
 

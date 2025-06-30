@@ -269,3 +269,181 @@ header() {
     separator
     echo ""
 }
+
+# Conda migration functions
+backup_conda_environments() {
+    local backup_dir="$1"
+    local conda_path="$2"
+    
+    log_step "Backing up conda environments to $backup_dir..."
+    mkdir -p "$backup_dir"
+    
+    # Get list of environments (excluding base and directories with spaces)
+    local env_list
+    env_list=$("$conda_path" env list 2>/dev/null | grep -v "^#" | awk 'NF>1 {print $1}' | grep -v "base")
+    
+    if [ -z "$env_list" ]; then
+        log_info "No custom environments found to backup"
+        return 0
+    fi
+    
+    echo "$env_list" | while read -r env_name; do
+        if [ -n "$env_name" ]; then
+            log_info "Backing up environment: $env_name"
+            
+            # Export environment.yml
+            if "$conda_path" env export -n "$env_name" > "$backup_dir/${env_name}.yml" 2>/dev/null; then
+                log_debug "Exported $env_name.yml"
+            else
+                log_warning "Failed to export $env_name.yml"
+            fi
+            
+            # Export explicit spec list for exact reproduction
+            if "$conda_path" list --explicit -n "$env_name" > "$backup_dir/${env_name}.spec.txt" 2>/dev/null; then
+                log_debug "Exported $env_name.spec.txt"
+            else
+                log_warning "Failed to export $env_name.spec.txt"
+            fi
+        fi
+    done
+    
+    log_success "Environment backup completed"
+}
+
+restore_conda_environments() {
+    local backup_dir="$1"
+    local conda_path="$2"
+    
+    log_step "Restoring conda environments from $backup_dir..."
+    
+    # Find all .yml files in backup directory
+    for yml_file in "$backup_dir"/*.yml; do
+        if [ -f "$yml_file" ]; then
+            local env_name
+            env_name=$(basename "$yml_file" .yml)
+            
+            log_info "Restoring environment: $env_name"
+            
+            # Try to create environment from yml file
+            if "$conda_path" env create -f "$yml_file" >/dev/null 2>&1; then
+                log_success "Restored $env_name"
+            else
+                log_warning "Failed to restore $env_name from .yml, trying .spec.txt"
+                
+                # Fallback to spec file if yml fails
+                local spec_file="$backup_dir/${env_name}.spec.txt"
+                if [ -f "$spec_file" ]; then
+                    if "$conda_path" create --name "$env_name" --file "$spec_file" >/dev/null 2>&1; then
+                        log_success "Restored $env_name from spec file"
+                    else
+                        log_error "Failed to restore $env_name from both .yml and .spec.txt"
+                    fi
+                else
+                    log_error "No spec file found for $env_name"
+                fi
+            fi
+        fi
+    done
+    
+    log_success "Environment restoration completed"
+}
+
+prompt_conda_migration() {
+    local conda_path="$1"
+    
+    log_warning "Found existing conda installation at: $conda_path"
+    echo ""
+    echo "This script can install miniconda via Homebrew for unified package management."
+    echo "What would you like to do?"
+    echo ""
+    echo "1. Skip - Keep your existing installation (recommended if unsure)"
+    echo "2. Migrate - Backup environments, install via Homebrew, restore environments"  
+    echo "3. Abort - Stop the script to investigate manually"
+    echo ""
+    
+    while true; do
+        read -p "Please choose [1/2/3]: " -r choice
+        case $choice in
+            1)
+                log_info "Keeping existing conda installation"
+                return 1  # Skip installation
+                ;;
+            2)
+                log_info "Proceeding with conda migration"
+                return 0  # Proceed with migration
+                ;;
+            3)
+                log_info "Aborting script"
+                exit 0
+                ;;
+            *)
+                echo "Please enter 1, 2, or 3"
+                ;;
+        esac
+    done
+}
+
+migrate_conda_installation() {
+    local old_conda_path="$1"
+    local package_manager_install_cmd="$2"
+    
+    # Create backup directory
+    local backup_dir
+    backup_dir="$HOME/conda_backup_$(date +%Y%m%d_%H%M%S)"
+    
+    log_step "Starting conda migration process..."
+    
+    # Backup environments
+    backup_conda_environments "$backup_dir" "$old_conda_path"
+    
+    # Detect old conda installation directory
+    local old_conda_dir
+    old_conda_dir=$(dirname "$(dirname "$old_conda_path")")  # Remove /bin/conda
+    
+    if [ -d "$old_conda_dir" ]; then
+        # Rename old installation as backup
+        local backup_conda_dir="${old_conda_dir}.bak.$(date +%Y%m%d_%H%M%S)"
+        log_step "Backing up old conda installation to $backup_conda_dir"
+        
+        if mv "$old_conda_dir" "$backup_conda_dir" 2>/dev/null; then
+            log_success "Old conda installation backed up"
+        else
+            log_warning "Could not move old conda installation. It may still be accessible."
+        fi
+    fi
+    
+    # Install new conda via package manager
+    log_step "Installing miniconda via package manager..."
+    if eval "$package_manager_install_cmd miniconda"; then
+        log_success "Miniconda installed via package manager"
+    else
+        log_error "Failed to install miniconda via package manager"
+        return 1
+    fi
+    
+    # Find new conda installation
+    local new_conda_path
+    new_conda_path=$(command -v conda 2>/dev/null)
+    
+    if [ -z "$new_conda_path" ]; then
+        log_error "New conda installation not found in PATH"
+        return 1
+    fi
+    
+    # Restore environments
+    restore_conda_environments "$backup_dir" "$new_conda_path"
+    
+    # Final instructions
+    echo ""
+    log_success "Conda migration completed!"
+    echo ""
+    echo "📋 Next steps:"
+    echo "1. Test your environments: conda activate <env_name>"
+    echo "2. If everything works, you can safely remove:"
+    echo "   - Backup directory: $backup_dir"
+    if [ -n "${backup_conda_dir:-}" ]; then
+        echo "   - Old installation: $backup_conda_dir"
+    fi
+    echo "3. Update your shell configuration if needed"
+    echo ""
+}

@@ -127,6 +127,34 @@ is_package_installed() {
     esac
 }
 
+# Enhanced package status detection
+# Returns: not_installed, managed, external
+check_package_status() {
+    local package="$1"
+    local binary="${2:-$package}"  # Default binary name to package name
+    
+    # Check if the binary is available in PATH
+    if ! command -v "$binary" >/dev/null 2>&1; then
+        echo "not_installed"
+        return 0
+    fi
+    
+    # Check if package is managed by the current package manager
+    if is_package_installed "$package"; then
+        echo "managed"
+        return 0
+    fi
+    
+    echo "external"
+    return 0
+}
+
+# Get the installation path of a command
+get_command_path() {
+    local binary="$1"
+    command -v "$binary" 2>/dev/null
+}
+
 # Install packages using detected package manager
 install_packages() {
     local packages=("$@")

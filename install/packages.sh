@@ -13,6 +13,23 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DOTFILES_DIR/lib/utils.sh"
 source "$DOTFILES_DIR/lib/os_detect.sh"
 
+# Get binary name for a package (handles special cases)
+get_binary_name() {
+    local package="$1"
+    
+    case "$package" in
+        "miniconda"|"anaconda")
+            echo "conda"
+            ;;
+        "thefuck")
+            echo "fuck"
+            ;;
+        *)
+            echo "$package"
+            ;;
+    esac
+}
+
 # Read packages from a file, filtering out comments and empty lines
 read_package_list() {
     local file="$1"
@@ -55,35 +72,101 @@ install_from_list() {
     # Install each package
     for package in "${package_array[@]}"; do
         if [ -n "$package" ]; then  # Skip empty strings
-            install_single_package "$package"
+            local binary_name
+            binary_name=$(get_binary_name "$package")
+            install_single_package "$package" "$binary_name"
         fi
     done
 }
 
-# Install a single package with error handling
+# Install a single package with enhanced detection and migration support
 install_single_package() {
     local package="$1"
+    local binary="${2:-$package}"  # Binary name defaults to package name
     
-    # Check if already installed
-    if is_package_installed "$package"; then
-        log_success "$package already installed"
-        return 0
-    fi
+    log_debug "Checking package: $package (binary: $binary)"
     
-    log_info "Installing $package..."
+    # Check package status: not_installed, managed, external
+    local status
+    status=$(check_package_status "$package" "$binary")
     
-    # Install using the detected package manager
-    if [ "$PACKAGE_MANAGER" = "unknown" ]; then
-        log_error "No supported package manager found for installing $package"
-        return 1
-    fi
+    case "$status" in
+        "not_installed")
+            log_info "Installing $package..."
+            
+            # Install using the detected package manager
+            if [ "$PACKAGE_MANAGER" = "unknown" ]; then
+                log_error "No supported package manager found for installing $package"
+                return 1
+            fi
+            
+            # Execute install command
+            if eval "$INSTALL_CMD $package"; then
+                log_success "$package installed successfully"
+            else
+                log_warning "Failed to install $package (continuing with other packages)"
+                return 1
+            fi
+            ;;
+            
+        "managed")
+            log_success "$package already managed by $PACKAGE_MANAGER"
+            return 0
+            ;;
+            
+        "external")
+            # Handle external installations
+            handle_external_package "$package" "$binary"
+            ;;
+    esac
+}
+
+# Handle packages that are installed externally (not via package manager)
+handle_external_package() {
+    local package="$1"
+    local binary="$2"
+    local binary_path
+    binary_path=$(get_command_path "$binary")
     
-    # Execute install command
-    if eval "$INSTALL_CMD $package"; then
-        log_success "$package installed successfully"
+    # Special handling for specific packages
+    case "$package" in
+        "miniconda"|"anaconda")
+            handle_conda_external "$binary_path"
+            ;;
+        *)
+            # For simple tools like git, curl, etc., just skip with info
+            log_info "Found external installation of $package at $binary_path"
+            
+            if confirm "Install $PACKAGE_MANAGER version anyway? (may cause conflicts)" "n"; then
+                log_info "Installing $package via $PACKAGE_MANAGER..."
+                if eval "$INSTALL_CMD $package"; then
+                    log_success "$package installed via $PACKAGE_MANAGER"
+                    log_warning "You now have multiple versions. Ensure PATH is configured correctly."
+                else
+                    log_warning "Failed to install $package via $PACKAGE_MANAGER"
+                fi
+            else
+                log_info "Skipping $PACKAGE_MANAGER installation of $package"
+            fi
+            ;;
+    esac
+}
+
+# Handle external conda installations
+handle_conda_external() {
+    local conda_path="$1"
+    
+    if prompt_conda_migration "$conda_path"; then
+        # User chose to migrate
+        if migrate_conda_installation "$conda_path" "$INSTALL_CMD"; then
+            log_success "Conda migration completed successfully"
+        else
+            log_error "Conda migration failed"
+            return 1
+        fi
     else
-        log_warning "Failed to install $package (continuing with other packages)"
-        return 1
+        # User chose to skip
+        log_info "Keeping existing conda installation at $conda_path"
     fi
 }
 

@@ -1,35 +1,108 @@
-# Personal Dotfiles Configuration
+# Universal Dotfiles
 
-A comprehensive dotfiles setup for macOS optimized for development productivity and aesthetics.
+Streamlined, cross-platform dotfiles setup with Fish shell priority and Zsh compatibility.
 
-## 🚀 Quick Start
+## Quick Start
 
-### macOS Setup (Recommended)
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+# Single command setup
+make install
 
-# Run the macOS setup script
-chmod +x macOS/setup.sh
-./macOS/setup.sh
+# Or run directly
+./setup.sh
 ```
 
-### Manual Linux Setup
-```bash
-# For Linux systems, use the zsh installation script
-chmod +x zsh/install-zsh-setup.sh
-./zsh/install-zsh-setup.sh
+## Features
+
+- 🐠 **Fish shell preferred** with Zsh fallback
+- 🖥️ **Cross-platform**: macOS & Linux support
+- 📦 **Smart package management** with OS detection
+- 🔄 **Idempotent**: Safe to run multiple times
+- 🎨 **Oh My Posh** themes included
+- ⚡ **Modern tools**: bat, eza, zoxide, fzf, etc.
+
+## Directory Structure
+
+```
+.
+├── setup.sh                # Universal entry point
+├── Makefile                # Simple targets (install, update, etc.)
+│
+├── lib/                    # Core libraries
+│   ├── os_detect.sh        # OS & package manager detection
+│   └── utils.sh           # Helper functions & logging
+│
+├── install/               # Installation scripts
+│   ├── packages.sh        # Package installation
+│   ├── shell.sh          # Shell configuration
+│   ├── packages.common   # Common packages
+│   ├── packages.macos    # macOS-specific packages
+│   └── packages.linux_*  # Linux distribution packages
+│
+└── config/               # Configuration files
+    ├── fish/            # Fish shell configs
+    ├── zsh/             # Zsh configs  
+    └── shared/          # Shared configs (git, themes, etc.)
 ```
 
-## 📦 What's Included
+## Usage
 
-### 🐚 Zsh Configuration
-- **Oh My Posh** with custom Atomic theme
-- **Syntax highlighting** for better command visibility
-- **Autosuggestions** for faster command completion
-- **Zoxide** for smart directory navigation
-- **Modern CLI tools**: `bat`, `eza`, `duf`, `thefuck`
+### Standard Installation
+```bash
+make install        # Full setup with Fish preferred
+./setup.sh         # Same as above
+```
+
+### Shell-Specific Setup
+```bash
+make fish          # Setup Fish shell only
+make zsh           # Setup Zsh only
+```
+
+### Maintenance
+```bash
+make update        # Update repo and reinstall
+make clean         # Reset setup state
+```
+
+### Debug Mode
+```bash
+./setup.sh --debug
+```
+
+## What Gets Installed
+
+### Common Tools
+- **Shells**: fish, zsh
+- **Modern CLI**: bat, eza, duf, zoxide, fzf
+- **Development**: git, gh, neovim
+- **System**: curl, wget, tree, htop
+
+### macOS Additions
+- Homebrew (if not present)
+- Miniconda
+- Zsh plugins via Homebrew
+
+### Linux Additions  
+- Build tools (gcc, make)
+- Development libraries
+- Distribution-specific packages
+
+## Shell Configuration
+
+### Fish (Preferred)
+- Modern shell with excellent defaults
+- Fisher plugin manager
+- Smart command completion
+- Zsh history migration
+
+### Zsh (Fallback)
+- Cross-platform compatibility
+- Oh My Zsh alternatives
+- Manual plugin management
+- Performance optimizations
+
+## Application Configurations
 
 ### 🖥️ Terminal (Ghostty)
 - **Theme**: Light (Material) / Dark (Vesper) with auto-switching
@@ -44,148 +117,82 @@ chmod +x zsh/install-zsh-setup.sh
 - **LaTeX**: Workshop configuration with custom output directory
 - **Remote SSH**: Optimized connection settings
 
-### 🔧 Development Tools
-- **GitHub CLI** with authentication setup
-- **Conda/Miniconda** environment management
-- **Git aliases** for common operations
-- **Custom file exclusions** for cleaner workspace
+## Customization
 
-## 📁 Directory Structure
+### Adding Packages
+Edit the appropriate package file:
+- `install/packages.common` - All platforms
+- `install/packages.macos` - macOS only  
+- `install/packages.linux_*` - Linux distributions
 
-```
-dotfiles/
-├── README.md                    # This file
-├── VSCode/
-│   └── settings.json           # VSCode/Cursor settings
-├── ghostty/
-│   └── config                  # Ghostty terminal configuration
-├── macOS/
-│   └── setup.sh               # Automated macOS setup script
-└── zsh/
-    ├── atomic.omp.json        # Custom Oh My Posh theme
-    └── install-zsh-setup.sh   # Linux zsh installation script
-```
+### Shell Configs
+- Fish: `config/fish/config.fish`
+- Zsh: `config/zsh/.zshrc`
+- Shared: `config/shared/`
 
-## ⚙️ Configuration Details
+### Themes
+Oh My Posh themes in `config/shared/themes/`
 
-### Zsh Features
-- **History**: 10,000 commands with deduplication
-- **Auto-completion**: Enhanced with context-aware suggestions
-- **Navigation**: `z` command for quick directory jumping
-- **Aliases**: Git shortcuts and improved `ls` commands
-- **Theme**: Custom Atomic theme with:
-  - Shell indicator
-  - Current path with folder icons
-  - Git status with branch and changes
-  - Execution time for long-running commands
-  - Language-specific version indicators (Python, Node, Java, etc.)
-  - System information (OS, battery, time)
+## Post-Installation Steps
 
-### VSCode/Cursor Optimizations
-- **Performance**: GPU acceleration disabled for stability
-- **UI**: Minimal layout with right sidebar placement
-- **Editor**: Smooth scrolling, underline cursor, optimized padding
-- **Remote Development**: SSH configuration with timeout settings
-- **Language Support**: 
-  - Python with Ruff formatting
-  - LaTeX with ChkTeX linting
-  - GitHub Copilot integration (selective)
-
-### Ghostty Terminal
-- **Adaptive theming** based on system appearance
-- **Font rendering** optimized for coding
-- **Shell integration** with zsh for enhanced features
-- **Window management** with proper sizing defaults
-
-## 🛠️ Manual Configuration Steps
-
-### After Installation
-
-1. **Restart your terminal** or run `source ~/.zshrc`
+1. **Restart your terminal** or run `exec $SHELL`
 2. **Authenticate GitHub CLI**: `gh auth login`
 3. **Enable Copilot** (optional): `gh extension install github/gh-copilot`
-4. **Install VSCode extensions** as needed
-5. **Configure Git**:
+4. **Configure Git**:
    ```bash
    git config --global user.name "Your Name"
    git config --global user.email "your.email@example.com"
    ```
 
-### Font Installation
-The setup script installs CaskaydiaMono Nerd Font, but if you need additional fonts:
+## Troubleshooting
+
+### Permission Issues
 ```bash
-brew install --cask font-cascadia-code-pl
-brew install --cask font-monaspace
+# Make scripts executable
+chmod +x setup.sh install/*.sh
 ```
 
-## 🎨 Customization
-
-### Changing Oh My Posh Theme
+### Package Manager Issues
 ```bash
-# List available themes
-oh-my-posh get themes
-
-# Use a different theme
-oh-my-posh init zsh --config ~/.cache/oh-my-posh/themes/<theme-name>.omp.json
+# Debug package manager detection
+./setup.sh --debug
 ```
 
-### Modifying Zsh Configuration
-Edit `~/.zshrc` to add custom aliases, functions, or environment variables.
-
-### VSCode Settings Sync
-Enable Settings Sync in VSCode to synchronize across devices, or manually copy `VSCode/settings.json` to your VSCode settings directory.
-
-## 🔍 Troubleshooting
+### Reset Everything
+```bash
+make clean
+make install
+```
 
 ### Command Not Found Errors
 ```bash
 # Reload shell configuration
-source ~/.zshrc
+exec $SHELL
 
 # Check PATH
 echo $PATH
 
-# Reinstall homebrew packages
-brew doctor && brew update
+# Reinstall packages
+make update
 ```
 
-### Oh My Posh Theme Issues
-```bash
-# Reinstall oh-my-posh
-brew reinstall oh-my-posh
+## Migration from Old Structure
 
-# Verify theme file exists
-ls ~/.cache/oh-my-posh/themes/atomic.omp.json
-```
+The new structure replaces:
+- `fishOS/` → `config/fish/` + `install/shell.sh`
+- `macOS/` → `install/packages.sh` + universal detection
+- `linuxOS/` → `install/packages.sh` + distribution-specific lists
+- `zsh/` → `config/zsh/` + `install/shell.sh`
 
-### Font Rendering Problems
-- Ensure terminal is using a Nerd Font
-- Check font installation: `brew list --cask | grep font`
-- Restart terminal application after font changes
+Legacy Makefile targets (`mac`, `linux`, `server`) redirect to `make install`.
 
-## 📋 Dependencies
+## Contributing
 
-### Installed via Homebrew
-- `bat` - Better cat with syntax highlighting
-- `eza` - Modern ls replacement
-- `duf` - Better df with disk usage visualization
-- `zoxide` - Smarter cd command
-- `thefuck` - Command correction tool
-- `gh` - GitHub CLI
-- `oh-my-posh` - Prompt theme engine
-
-### Zsh Plugins
-- `zsh-autosuggestions` - Command suggestions
-- `zsh-syntax-highlighting` - Syntax highlighting
-
-## 🤝 Contributing
-
-Feel free to fork this repository and customize it for your own needs. If you have improvements or bug fixes, pull requests are welcome!
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+1. Test changes on both macOS and Linux
+2. Maintain backwards compatibility for existing users
+3. Follow the concern-based directory structure
+4. Update package lists rather than hardcoding in scripts
 
 ---
 
-**Note**: This configuration is optimized for macOS development workflows but includes Linux compatibility scripts. Some features may require adjustment for different environments.
+**Previous Version**: See legacy setup in `fishOS/`, `macOS/`, `linuxOS/`, and `zsh/` directories (deprecated).

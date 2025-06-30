@@ -3,27 +3,48 @@ SHELL := /bin/bash
 # Get the directory where this Makefile is located
 DOTFILES_DIR := $(shell pwd)
 
-.PHONY: help zsh fish linux fish-server
+.PHONY: help install update fish zsh clean
 
 help:
-	@echo "Please use \`make <target>\` where <target> is one of the following:"
-	@echo "  zsh         - installs the zsh configuration (macOS)"
-	@echo "  fish        - installs the fish shell configuration"
-	@echo "  fish-server - installs fish configuration for servers (no sudo, ~/.local install)"
-	@echo "  linux       - installs the linux configuration"
+	@echo "Universal Dotfiles Setup"
+	@echo "========================"
+	@echo ""
+	@echo "Usage: make <target>"
+	@echo ""
+	@echo "Targets:"
+	@echo "  install     - Run universal dotfiles installation (recommended)"
+	@echo "  update      - Update repository and reinstall"
+	@echo "  fish        - Setup Fish shell specifically"
+	@echo "  zsh         - Setup Zsh shell specifically"
+	@echo "  clean       - Remove setup marker (forces full reinstall)"
+	@echo ""
+	@echo "For more options, run: ./setup.sh --help"
+
+install:
+	@echo "🚀 Running universal dotfiles installation..."
+	@cd $(DOTFILES_DIR) && ./setup.sh
+
+update:
+	@echo "🔄 Updating repository and reinstalling..."
+	@git pull --ff-only
+	@cd $(DOTFILES_DIR) && ./setup.sh
+
+fish:
+	@echo "🐠 Setting up Fish shell..."
+	@cd $(DOTFILES_DIR) && ./install/shell.sh fish
 
 zsh:
-	@echo "Installing zsh configuration..."
-	@cd $(DOTFILES_DIR) && ./macOS/setup.sh
+	@echo "🐚 Setting up Zsh shell..."
+	@cd $(DOTFILES_DIR) && ./install/shell.sh zsh
 
-linux:
-	@echo "Installing linux configuration..."
-	@cd $(DOTFILES_DIR) && ./linuxOS/setup.sh
+clean:
+	@echo "🧹 Cleaning up setup markers..."
+	@rm -f ~/.dotfiles_setup_complete
+	@echo "Setup markers removed. Next 'make install' will run full setup."
 
-mac:
-	@echo "Installing fish shell configuration..."
-	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup.sh
+# Legacy targets for backwards compatibility
+mac: install
+linux: install
+server: install
 
-server:
-	@echo "Installing fish shell configuration for server (no sudo)..."
-	@cd $(DOTFILES_DIR) && ./fishOS/fish/setup-server.sh
+.DEFAULT_GOAL := help

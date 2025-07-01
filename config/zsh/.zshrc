@@ -174,7 +174,22 @@ unset conda_locations conda_path conda_base
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
 
-# Load additional local configurations if they exist
+# --- Local & Machine-Specific Overrides ---
+# For settings that should NOT be in git (secrets, machine-specific paths, work configs)
+# Add .sh/.zsh files to ~/.config/zsh/local.d/
+# Files load alphabetically - use prefixes like 01-paths.sh, 10-work.sh to control order
+#
+# Example: ~/.config/zsh/local.d/01-python.sh
+#   export PYTHONPATH="${PYTHONPATH}:/path/to/local/python/modules"
+#
+local_config_dir="$HOME/.config/zsh/local.d"
+if [[ -d "$local_config_dir" ]]; then
+    for file in "$local_config_dir"/*.{sh,zsh}; do
+        [[ -f "$file" ]] && source "$file"
+    done
+fi
+
+# Legacy: Load single local file if it exists (for backward compatibility)
 if [[ -f "$HOME/.zshrc.local" ]]; then
     source "$HOME/.zshrc.local"
 fi

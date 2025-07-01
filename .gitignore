@@ -16,3 +16,10 @@ Thumbs.db
 .zcompdump*
 .zsh_history
 macOS/.zcompcache/
+
+# Machine-specific local configurations
+# These directories contain local overrides that should NOT be committed
+**/local.d/
+**/*[._]local*
+*.local
+*.local.*

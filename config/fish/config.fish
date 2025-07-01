@@ -106,3 +106,20 @@ end
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
+
+# --- Local & Machine-Specific Overrides ---
+# For settings that should NOT be in git (secrets, machine-specific paths, work configs)
+# Add .fish files to ~/.config/fish/local.d/
+# Files load alphabetically - use prefixes like 01-paths.fish, 10-work.fish to control order
+#
+# Example: ~/.config/fish/local.d/01-python.fish
+#   set -px PYTHONPATH /path/to/local/python/modules
+#
+set local_config_dir "$HOME/.config/fish/local.d"
+if test -d "$local_config_dir"
+    for file in "$local_config_dir"/*.fish
+        if test -f "$file"
+            source "$file"
+        end
+    end
+end

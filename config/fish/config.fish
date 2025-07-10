@@ -5,8 +5,13 @@ set -U fish_history_size 10000
 set -g fish_greeting ""
 
 # Environment variables
-set -x PATH "/opt/homebrew/bin" $PATH
-set -x PATH "$HOME/.local/bin" $PATH
+# Only add paths that exist to avoid warnings
+if test -d "/opt/homebrew/bin"
+    set -x PATH "/opt/homebrew/bin" $PATH
+end
+if test -d "$HOME/.local/bin"
+    set -x PATH "$HOME/.local/bin" $PATH
+end
 
 # Aliases
 # if macos use bat else batcat
@@ -39,9 +44,13 @@ if command -v zoxide >/dev/null 2>&1
     zoxide init fish --cmd cd | source
 end
 
-# Oh My Posh
+# Oh My Posh (skip on older fish versions to avoid syntax errors)
 if command -v oh-my-posh >/dev/null 2>&1
-    oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" | source
+    if test -f "$HOME/.dotfiles/themes/atomic.omp.json"
+        # Try to load oh-my-posh, skip on syntax errors (older fish versions)
+        oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" 2>/dev/null | source 2>/dev/null
+        or echo "⚠️  Skipping oh-my-posh (requires newer fish version)"
+    end
 end
 
 # OrbStack

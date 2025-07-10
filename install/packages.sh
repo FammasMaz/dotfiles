@@ -87,7 +87,17 @@ install_package_user_space() {
     # Define package-to-manager heuristics here.
     # Using padded spaces to ensure whole-word matching.
     local pip_packages=" thefuck youtube-dl yt-dlp "
-    local cargo_packages=" exa bat ripgrep fd-find "
+    local cargo_packages=" exa bat ripgrep fd-find rg "
+    local conda_forge_packages=" fish zsh git curl wget "
+    
+    # Package name mappings for different managers
+    local cargo_name="$package"
+    case "$package" in
+        "fd-find") cargo_name="fd-find" ;;
+        "ripgrep") cargo_name="ripgrep" ;;
+        "bat") cargo_name="bat" ;;
+        "exa") cargo_name="exa" ;;
+    esac
 
     # Strategy 1: Pip for known Python packages
     if [ -n "$USER_PIP_CMD" ]; then
@@ -107,7 +117,7 @@ install_package_user_space() {
         case "$cargo_packages" in
             *" $package "*)
                 log_info "-> Found match for '$package', trying 'cargo install'..."
-                if "$USER_CARGO_CMD" install "$package"; then
+                if "$USER_CARGO_CMD" install "$cargo_name"; then
                     log_success "Installed $package via cargo."
                     return 0
                 fi
@@ -115,14 +125,34 @@ install_package_user_space() {
         esac
     fi
 
-    # Strategy 3: Fallback to Conda (if available)
-    # Conda is a general-purpose manager, so it's a good fallback.
+    # Strategy 3: Conda-forge for packages not in default channels
     if [ -n "$USER_CONDA_CMD" ]; then
-        log_info "-> No specific manager found, falling back to 'conda'..."
-        if "$USER_CONDA_CMD" install -y "$package"; then
-            log_success "Installed $package via conda."
-            return 0
-        fi
+        case "$conda_forge_packages" in
+            *" $package "*)
+                log_info "-> Found match for '$package', trying 'conda install' from conda-forge..."
+                if "$USER_CONDA_CMD" install -c conda-forge -y "$package"; then
+                    log_success "Installed $package via conda-forge."
+                    return 0
+                fi
+                ;;
+        esac
+    fi
+
+    # Strategy 4: Fallback to default Conda (if available)
+    # Only try this for packages not known to fail
+    if [ -n "$USER_CONDA_CMD" ]; then
+        case "$cargo_packages" in
+            *" $package "*) 
+                log_info "-> Skipping conda fallback for Rust package '$package'"
+                ;;
+            *)
+                log_info "-> Trying conda default channels as fallback..."
+                if "$USER_CONDA_CMD" install -y "$package"; then
+                    log_success "Installed $package via conda."
+                    return 0
+                fi
+                ;;
+        esac
     fi
 
     log_warning "No user-space installation method succeeded for '$package'."

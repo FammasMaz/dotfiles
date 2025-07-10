@@ -79,6 +79,56 @@ install_from_list() {
     done
 }
 
+# Attempt to install a package into the user's local directories
+install_package_user_space() {
+    local package="$1"
+    log_info "Attempting user-space installation for $package..."
+
+    # Define package-to-manager heuristics here.
+    # Using padded spaces to ensure whole-word matching.
+    local pip_packages=" thefuck youtube-dl yt-dlp "
+    local cargo_packages=" exa bat ripgrep fd-find "
+
+    # Strategy 1: Pip for known Python packages
+    if [ -n "$USER_PIP_CMD" ]; then
+        case "$pip_packages" in
+            *" $package "*)
+                log_info "-> Found match for '$package', trying 'pip install --user'..."
+                if "$USER_PIP_CMD" install --user "$package"; then
+                    log_success "Installed $package via pip."
+                    return 0
+                fi
+                ;;
+        esac
+    fi
+
+    # Strategy 2: Cargo for known Rust crates
+    if [ -n "$USER_CARGO_CMD" ]; then
+        case "$cargo_packages" in
+            *" $package "*)
+                log_info "-> Found match for '$package', trying 'cargo install'..."
+                if "$USER_CARGO_CMD" install "$package"; then
+                    log_success "Installed $package via cargo."
+                    return 0
+                fi
+                ;;
+        esac
+    fi
+
+    # Strategy 3: Fallback to Conda (if available)
+    # Conda is a general-purpose manager, so it's a good fallback.
+    if [ -n "$USER_CONDA_CMD" ]; then
+        log_info "-> No specific manager found, falling back to 'conda'..."
+        if "$USER_CONDA_CMD" install -y "$package"; then
+            log_success "Installed $package via conda."
+            return 0
+        fi
+    fi
+
+    log_warning "No user-space installation method succeeded for '$package'."
+    return 1
+}
+
 # Install a single package with enhanced detection and migration support
 install_single_package() {
     local package="$1"
@@ -94,7 +144,21 @@ install_single_package() {
         "not_installed")
             log_info "Installing $package..."
             
-            # Install using the detected package manager
+            # If --no-sudo is active, attempt user-space installation first.
+            if [ "${NO_SUDO:-0}" -eq 1 ]; then
+                if install_package_user_space "$package"; then
+                    return 0 # Success is logged within the helper
+                else
+                    return 1 # Warning is logged within the helper
+                fi
+            fi
+
+            # --- Standard system installation logic ---
+            if [ -z "$INSTALL_CMD" ]; then
+                log_warning "System installer not available (or --no-sudo used on a sudo-based system). Skipping $package."
+                return 1
+            fi
+            
             if [ "$PACKAGE_MANAGER" = "unknown" ]; then
                 log_error "No supported package manager found for installing $package"
                 return 1
@@ -224,6 +288,11 @@ install_miniconda_linux() {
 
 # Update package manager repositories
 update_package_manager() {
+    if [ "${NO_SUDO:-0}" -eq 1 ]; then
+        log_info "Skipping package manager update due to --no-sudo mode."
+        return 0
+    fi
+
     if [ "$PACKAGE_MANAGER" = "unknown" ]; then
         log_warning "No package manager detected, skipping update"
         return 1

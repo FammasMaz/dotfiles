@@ -65,6 +65,9 @@ make update        # Update repo and reinstall
 make clean         # Reset setup state
 ```
 
+### Custom configs
+If you want to add custom stuff in your local configs, add them to $HOME/.config/fish/local.d/01-custom.fish
+
 ### Debug Mode
 ```bash
 ./setup.sh --debug

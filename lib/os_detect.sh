@@ -10,6 +10,11 @@ export PACKAGE_MANAGER=""
 export INSTALL_CMD=""
 export UPDATE_CMD=""
 
+# User-space package manager commands
+export USER_CONDA_CMD=""
+export USER_PIP_CMD=""
+export USER_CARGO_CMD=""
+
 # Detect operating system
 detect_os() {
     case "$OSTYPE" in
@@ -65,28 +70,40 @@ detect_package_manager() {
         UPDATE_CMD="brew update && brew upgrade"
     elif command -v apt-get >/dev/null 2>&1; then
         PACKAGE_MANAGER="apt"
-        INSTALL_CMD="sudo apt-get install -y"
-        UPDATE_CMD="sudo apt-get update && sudo apt-get upgrade -y"
+        if [ "${NO_SUDO:-0}" -eq 0 ]; then
+            INSTALL_CMD="sudo apt-get install -y"
+            UPDATE_CMD="sudo apt-get update && sudo apt-get upgrade -y"
+        fi
     elif command -v dnf >/dev/null 2>&1; then
         PACKAGE_MANAGER="dnf"
-        INSTALL_CMD="sudo dnf install -y"
-        UPDATE_CMD="sudo dnf check-update && sudo dnf upgrade -y"
+        if [ "${NO_SUDO:-0}" -eq 0 ]; then
+            INSTALL_CMD="sudo dnf install -y"
+            UPDATE_CMD="sudo dnf check-update && sudo dnf upgrade -y"
+        fi
     elif command -v pacman >/dev/null 2>&1; then
         PACKAGE_MANAGER="pacman"
-        INSTALL_CMD="sudo pacman -S --noconfirm"
-        UPDATE_CMD="sudo pacman -Syu --noconfirm"
+        if [ "${NO_SUDO:-0}" -eq 0 ]; then
+            INSTALL_CMD="sudo pacman -S --noconfirm"
+            UPDATE_CMD="sudo pacman -Syu --noconfirm"
+        fi
     elif command -v zypper >/dev/null 2>&1; then
         PACKAGE_MANAGER="zypper"
-        INSTALL_CMD="sudo zypper install -y"
-        UPDATE_CMD="sudo zypper refresh && sudo zypper update -y"
+        if [ "${NO_SUDO:-0}" -eq 0 ]; then
+            INSTALL_CMD="sudo zypper install -y"
+            UPDATE_CMD="sudo zypper refresh && sudo zypper update -y"
+        fi
     elif command -v apk >/dev/null 2>&1; then
         PACKAGE_MANAGER="apk"
-        INSTALL_CMD="sudo apk add"
-        UPDATE_CMD="sudo apk update && sudo apk upgrade"
+        if [ "${NO_SUDO:-0}" -eq 0 ]; then
+            INSTALL_CMD="sudo apk add"
+            UPDATE_CMD="sudo apk update && sudo apk upgrade"
+        fi
     elif command -v yum >/dev/null 2>&1; then
         PACKAGE_MANAGER="yum"
-        INSTALL_CMD="sudo yum install -y"
-        UPDATE_CMD="sudo yum check-update && sudo yum update -y"
+        if [ "${NO_SUDO:-0}" -eq 0 ]; then
+            INSTALL_CMD="sudo yum install -y"
+            UPDATE_CMD="sudo yum check-update && sudo yum update -y"
+        fi
     else
         PACKAGE_MANAGER="unknown"
         INSTALL_CMD=""
@@ -193,10 +210,29 @@ show_system_info() {
     echo "   Architecture: $(uname -m)"
 }
 
+# Detect available user-space package managers
+detect_user_managers() {
+    USER_CONDA_CMD=$(command -v conda 2>/dev/null)
+
+    if command -v pip3 >/dev/null 2>&1; then
+        USER_PIP_CMD="pip3"
+    elif command -v pip >/dev/null 2>&1; then
+        USER_PIP_CMD="pip"
+    fi
+
+    # Also check the default cargo path in case it's not in the current shell's PATH yet
+    if command -v cargo >/dev/null 2>&1; then
+        USER_CARGO_CMD="cargo"
+    elif [ -f "$HOME/.cargo/bin/cargo" ]; then
+        USER_CARGO_CMD="$HOME/.cargo/bin/cargo"
+    fi
+}
+
 # Initialize detection (call this to populate variables)
 init_detection() {
     detect_os
     detect_package_manager
+    detect_user_managers
 }
 
 # Auto-initialize when sourced

@@ -92,6 +92,11 @@ setup_shell() {
 # Attempt to install a shell using the package manager
 attempt_shell_install() {
     local shell_name="$1"
+
+    if [ "${NO_SUDO:-0}" -eq 1 ]; then
+        log_warning "Cannot install $shell_name due to --no-sudo. Setup will continue only if it's already installed."
+        return 1
+    fi
     
     if [ "$PACKAGE_MANAGER" = "unknown" ]; then
         log_warning "No package manager available to install $shell_name"
@@ -257,28 +262,48 @@ show_next_steps() {
 
 # Main execution flow
 main() {
-    # Handle debug mode
-    if [ "${1:-}" = "--debug" ] || [ "${DEBUG:-}" = "1" ]; then
-        export DEBUG=1
-        log_debug "Debug mode enabled"
+    # Default flags
+    export NO_SUDO=0
+    export DEBUG=0
+
+    # Parse arguments
+    for arg in "$@"; do
+        case "$arg" in
+            --no-sudo)
+                export NO_SUDO=1
+                shift
+                ;;
+            --debug)
+                export DEBUG=1
+                shift
+                ;;
+            -h|--help)
+                show_banner
+                echo "Usage: $0 [--no-sudo] [--debug] [--help]"
+                echo ""
+                echo "Options:"
+                echo "  --no-sudo  Run without attempting any sudo operations"
+                echo "  --debug    Enable debug output"
+                echo "  --help     Show this help message"
+                echo ""
+                echo "This script will:"
+                echo "  1. Detect your OS and package manager"
+                echo "  2. Install essential packages (skipped with --no-sudo)"
+                echo "  3. Setup Fish shell (preferred) or Zsh (fallback)"
+                echo "  4. Configure shell environments and tools"
+                echo "  5. Create symlinks to configuration files"
+                exit 0
+                ;;
+        esac
+    done
+
+    # Log mode information
+    if [ "$NO_SUDO" -eq 1 ]; then
+        log_info "Running in --no-sudo mode. Sudo-required operations will be skipped."
     fi
     
-    # Handle help
-    if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
-        show_banner
-        echo "Usage: $0 [--debug] [--help]"
-        echo ""
-        echo "Options:"
-        echo "  --debug    Enable debug output"
-        echo "  --help     Show this help message"
-        echo ""
-        echo "This script will:"
-        echo "  1. Detect your OS and package manager"
-        echo "  2. Install essential packages"
-        echo "  3. Setup Fish shell (preferred) or Zsh (fallback)"
-        echo "  4. Configure shell environments and tools"
-        echo "  5. Create symlinks to configuration files"
-        exit 0
+    if [ "$DEBUG" -eq 1 ]; then
+        log_debug "Debug mode enabled"
     fi
     
     show_banner

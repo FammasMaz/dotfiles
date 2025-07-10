@@ -155,7 +155,120 @@ install_package_user_space() {
         esac
     fi
 
+    # Strategy 5: Binary download for tools without cargo/conda
+    case "$package" in
+        "bat"|"eza"|"ripgrep"|"fd-find")
+            log_info "-> Trying binary download for '$package'..."
+            if install_binary_from_github "$package"; then
+                log_success "Installed $package via binary download."
+                return 0
+            fi
+            ;;
+    esac
+
     log_warning "No user-space installation method succeeded for '$package'."
+    return 1
+}
+
+# Install binary from GitHub releases for common tools
+install_binary_from_github() {
+    local package="$1"
+    local bin_dir="$HOME/.local/bin"
+    
+    # Ensure ~/.local/bin exists
+    mkdir -p "$bin_dir"
+    
+    # Get system architecture
+    local arch=$(uname -m)
+    case "$arch" in
+        "x86_64") arch="x86_64" ;;
+        "aarch64"|"arm64") arch="aarch64" ;;
+        *) log_warning "Unsupported architecture: $arch"; return 1 ;;
+    esac
+    
+    # Define GitHub repos and binary patterns
+    local repo=""
+    local binary_name=""
+    local pattern=""
+    
+    case "$package" in
+        "bat")
+            repo="sharkdp/bat"
+            binary_name="bat"
+            pattern="bat-.*-${arch}-unknown-linux-musl.tar.gz"
+            ;;
+        "eza")
+            repo="eza-community/eza"
+            binary_name="eza"
+            pattern="eza_${arch}-unknown-linux-musl.tar.gz"
+            ;;
+        "ripgrep")
+            repo="BurntSushi/ripgrep"
+            binary_name="rg"
+            pattern="ripgrep-.*-${arch}-unknown-linux-musl.tar.gz"
+            ;;
+        "fd-find")
+            repo="sharkdp/fd"
+            binary_name="fd"
+            pattern="fd-.*-${arch}-unknown-linux-musl.tar.gz"
+            ;;
+        *)
+            log_warning "No binary download configured for '$package'"
+            return 1
+            ;;
+    esac
+    
+    log_info "Downloading $package from GitHub releases..."
+    
+    # Get latest release URL
+    local api_url="https://api.github.com/repos/$repo/releases/latest"
+    local download_url
+    
+    if command -v jq >/dev/null 2>&1; then
+        # Use jq if available
+        download_url=$(curl -s "$api_url" | jq -r ".assets[] | select(.name | test(\"$pattern\")) | .browser_download_url" | head -1)
+    else
+        # Fallback without jq
+        download_url=$(curl -s "$api_url" | grep -o "\"browser_download_url\":[^\"]*\"[^\"]*$pattern[^\"]*\"" | cut -d'"' -f4 | head -1)
+    fi
+    
+    if [ -z "$download_url" ]; then
+        log_warning "Could not find download URL for $package ($pattern)"
+        return 1
+    fi
+    
+    # Download and extract
+    local temp_dir=$(mktemp -d)
+    local archive_name="${download_url##*/}"
+    
+    log_info "Downloading from: $download_url"
+    if curl -L -o "$temp_dir/$archive_name" "$download_url"; then
+        cd "$temp_dir"
+        
+        # Extract archive
+        if tar -xzf "$archive_name"; then
+            # Find the binary and copy it
+            local extracted_binary=$(find . -name "$binary_name" -type f -executable | head -1)
+            if [ -n "$extracted_binary" ]; then
+                cp "$extracted_binary" "$bin_dir/$binary_name"
+                chmod +x "$bin_dir/$binary_name"
+                log_success "Installed $binary_name to $bin_dir"
+                
+                # Cleanup
+                rm -rf "$temp_dir"
+                return 0
+            else
+                log_warning "Could not find binary '$binary_name' in extracted archive"
+            fi
+        else
+            log_warning "Failed to extract $archive_name"
+        fi
+    else
+        log_warning "Failed to download $package"
+    fi
+    
+    # Cleanup on failure
+    rm -rf "$temp_dir"
     return 1
 }
 

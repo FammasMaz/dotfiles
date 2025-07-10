@@ -69,14 +69,35 @@ install_from_list() {
     local package_array
     read -ra package_array <<< "$packages"
     
-    # Install each package
+    # Install each package and track results
+    local failed_packages=""
+    local installed_count=0
+    local failed_count=0
+    
     for package in "${package_array[@]}"; do
         if [ -n "$package" ]; then  # Skip empty strings
             local binary_name
             binary_name=$(get_binary_name "$package")
-            install_single_package "$package" "$binary_name"
+            if install_single_package "$package" "$binary_name"; then
+                installed_count=$((installed_count + 1))
+            else
+                failed_count=$((failed_count + 1))
+                if [ -n "$failed_packages" ]; then
+                    failed_packages="$failed_packages, $package"
+                else
+                    failed_packages="$package"
+                fi
+            fi
         fi
     done
+    
+    # Summary
+    if [ $failed_count -gt 0 ]; then
+        log_warning "$failed_count package(s) failed to install: $failed_packages"
+        log_info "$installed_count package(s) installed successfully"
+    else
+        log_success "All $installed_count packages installed successfully"
+    fi
 }
 
 # Attempt to install a package into the user's local directories
@@ -166,7 +187,7 @@ install_package_user_space() {
             ;;
     esac
 
-    log_warning "No user-space installation method succeeded for '$package'."
+    log_debug "No user-space installation method succeeded for '$package'."
     return 1
 }
 
@@ -213,7 +234,7 @@ install_binary_from_github() {
             pattern="fd-.*-${arch}-unknown-linux-musl.tar.gz"
             ;;
         *)
-            log_warning "No binary download configured for '$package'"
+            log_debug "No binary download configured for '$package'"
             return 1
             ;;
     esac
@@ -292,7 +313,8 @@ install_single_package() {
                 if install_package_user_space "$package"; then
                     return 0 # Success is logged within the helper
                 else
-                    return 1 # Warning is logged within the helper
+                    log_warning "Failed to install $package via user-space methods"
+                    return 1
                 fi
             fi
 

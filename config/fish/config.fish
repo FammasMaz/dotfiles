@@ -119,22 +119,39 @@ function conda
     functions -e conda
     
     # Initialize conda on first use
-    set -l conda_path "/opt/homebrew/Caskroom/miniconda/base/bin/conda"
-    if test -f "$conda_path"
-        eval "$conda_path" "shell.fish" "hook" | source
-    else
-        # Fallback to PATH conda
-        if command -v conda >/dev/null 2>&1
-            set conda_path (command -v conda)
-            eval "$conda_path" "shell.fish" "hook" | source
-        else
-            echo "conda not found"
-            return 1
+    set -l conda_path ""
+    
+    # Check common conda installation paths
+    set -l conda_paths \
+        "/opt/homebrew/Caskroom/miniconda/base/bin/conda" \
+        "$HOME/miniconda3/bin/conda" \
+        "$HOME/miniconda/bin/conda" \
+        "$HOME/anaconda3/bin/conda" \
+        "$HOME/anaconda/bin/conda"
+    
+    for path in $conda_paths
+        if test -f "$path"
+            set conda_path "$path"
+            break
         end
     end
     
-    # Call conda with original arguments
-    conda $argv
+    # If not found in common paths, try PATH
+    if test -z "$conda_path"
+        if command -v conda >/dev/null 2>&1
+            set conda_path (command -v conda)
+        end
+    end
+    
+    # Initialize conda if found
+    if test -n "$conda_path"
+        eval "$conda_path" "shell.fish" "hook" | source
+        # Call conda with original arguments
+        conda $argv
+    else
+        echo "conda not found in common paths or PATH"
+        return 1
+    end
 end
 
 

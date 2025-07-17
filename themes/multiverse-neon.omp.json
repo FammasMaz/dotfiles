@@ -51,6 +51,20 @@
       "alignment": "right",
       "segments": [
         {
+          "type": "os",
+          "style": "diamond",
+          "background": "#29315A",
+          "foreground": "#43CCEA",
+          "leading_diamond": "\ue0b6",
+          "trailing_diamond": "\ue0b4 ",
+          "properties": {
+            "linux": "\ue712",
+            "macos": "\ue711", 
+            "windows": "\ue70f"
+          },
+          "template": " {{ .Icon }}  "
+        },
+        {
           "type": "node",
           "style": "plain",
           "foreground": "#88e570",
@@ -85,14 +99,18 @@
           "type": "ruby"
         },
         {
+          "type": "python",
+          "style": "diamond",
+          "background": "#29315A",
           "foreground": "#FED142",
+          "leading_diamond": " \ue0b6",
+          "trailing_diamond": "\ue0b4",
           "properties": {
-            "display_mode": "context",
-            "fetch_virtual_env": false
+            "display_mode": "environment",
+            "fetch_virtual_env": true,
+            "home_enabled": true
           },
-          "style": "plain",
-          "template": " {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }}",
-          "type": "python"
+          "template": " \ue235 {{ if .Venv }}{{ .Venv }}{{ else }}{{ .Full }}{{ end }} "
         }
       ],
       "type": "prompt"

@@ -44,24 +44,10 @@ if command -v zoxide >/dev/null 2>&1
     zoxide init fish --cmd cd | source
 end
 
-# Oh My Posh (lazy load for better performance)
+# Oh My Posh
 if command -v oh-my-posh >/dev/null 2>&1
-    if test -f "$HOME/.dotfiles/themes/atomic.omp.json"
-        # Cache oh-my-posh init to avoid repeated expensive calls
-        set -l omp_cache_file "$HOME/.cache/oh-my-posh/fish-init.fish"
-        set -l omp_config_file "$HOME/.dotfiles/themes/atomic.omp.json"
-        
-        # Check if cache exists and is newer than config
-        if test -f "$omp_cache_file" -a "$omp_cache_file" -nt "$omp_config_file"
-            source "$omp_cache_file" 2>/dev/null
-            or echo "⚠️  Oh-my-posh cache corrupted, regenerating..."
-        else
-            # Generate and cache oh-my-posh init
-            mkdir -p (dirname "$omp_cache_file")
-            oh-my-posh init fish --config "$omp_config_file" > "$omp_cache_file" 2>/dev/null
-            and source "$omp_cache_file" 2>/dev/null
-            or echo "⚠️  Skipping oh-my-posh (requires newer fish version)"
-        end
+    if test -f "$HOME/.dotfiles/themes/multiverse-neon.omp.json"
+        oh-my-posh init fish --config "$HOME/.dotfiles/themes/multiverse-neon.omp.json" | source
         
         # Fix for prompt disappearing after Ctrl+C
         function _fix_prompt_after_interrupt --on-signal SIGINT
@@ -103,16 +89,6 @@ if command -v oh-my-posh >/dev/null 2>&1
         
         # Bind Ctrl+P to recover prompt
         bind \cp _recover_prompt
-        
-        # Smart cache cleanup - remove old cache files (older than 7 days)
-        function _cleanup_omp_cache
-            find ~/.cache/oh-my-posh -name "omp.cache.*" -mtime +7 -delete 2>/dev/null
-        end
-        
-        # Run cleanup occasionally (every 100th shell startup)
-        if test (random 1 100) -eq 1
-            _cleanup_omp_cache &
-        end
     end
 end
 

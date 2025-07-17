@@ -44,12 +44,65 @@ if command -v zoxide >/dev/null 2>&1
     zoxide init fish --cmd cd | source
 end
 
-# Oh My Posh (skip on older fish versions to avoid syntax errors)
+# Oh My Posh (lazy load for better performance)
 if command -v oh-my-posh >/dev/null 2>&1
     if test -f "$HOME/.dotfiles/themes/atomic.omp.json"
-        # Try to load oh-my-posh, skip on syntax errors (older fish versions)
-        oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" 2>/dev/null | source 2>/dev/null
-        or echo "⚠️  Skipping oh-my-posh (requires newer fish version)"
+        # Cache oh-my-posh init to avoid repeated expensive calls
+        set -l omp_cache_file "$HOME/.cache/oh-my-posh/fish-init.fish"
+        set -l omp_config_file "$HOME/.dotfiles/themes/atomic.omp.json"
+        
+        # Check if cache exists and is newer than config
+        if test -f "$omp_cache_file" -a "$omp_cache_file" -nt "$omp_config_file"
+            source "$omp_cache_file" 2>/dev/null
+            or echo "⚠️  Oh-my-posh cache corrupted, regenerating..."
+        else
+            # Generate and cache oh-my-posh init
+            mkdir -p (dirname "$omp_cache_file")
+            oh-my-posh init fish --config "$omp_config_file" > "$omp_cache_file" 2>/dev/null
+            and source "$omp_cache_file" 2>/dev/null
+            or echo "⚠️  Skipping oh-my-posh (requires newer fish version)"
+        end
+        
+        # Fix for prompt disappearing after Ctrl+C
+        function _fix_prompt_after_interrupt --on-signal SIGINT
+            # Force prompt repaint after interrupt signal
+            if functions -q _omp_new_prompt
+                set -g _omp_new_prompt 1
+            end
+            # Trigger a new prompt
+            commandline -f repaint
+        end
+        
+        # Fallback prompt if oh-my-posh fails
+        function _fallback_prompt
+            set -l last_status $status
+            set -l user (whoami)
+            set -l hostname (hostname -s)
+            set -l pwd_short (string replace -r "^$HOME" "~" (pwd))
+            
+            if test $last_status -eq 0
+                echo -n "$user@$hostname:$pwd_short\$ "
+            else
+                echo -n "$user@$hostname:$pwd_short [$last_status]\$ "
+            end
+        end
+        
+        # Manual prompt recovery function (bind to Ctrl+P)
+        function _recover_prompt
+            if functions -q _omp_new_prompt
+                set -g _omp_new_prompt 1
+            end
+            if functions -q _omp_current_prompt
+                set -g _omp_current_prompt ""
+            end
+            if functions -q _omp_current_rprompt
+                set -g _omp_current_rprompt ""
+            end
+            commandline -f repaint
+        end
+        
+        # Bind Ctrl+P to recover prompt
+        bind \cp _recover_prompt
     end
 end
 
@@ -74,41 +127,28 @@ end
 # !! Contents within this block are managed by 'conda init' !!
 set -g conda_auto_activate_base false
 
-# Cross-platform conda detection (in order of preference)
-set -l conda_locations \
-    "/opt/homebrew/Caskroom/miniconda/base/bin/conda" \
-    "$HOME/miniconda3/bin/conda" \
-    "$HOME/anaconda3/bin/conda" \
-    "/usr/local/miniconda3/bin/conda" \
-    "/usr/local/anaconda3/bin/conda"
-
-set -l conda_path ""
-set -l conda_base ""
-
-# Find first available conda installation
-for location in $conda_locations
-    if test -f "$location"
-        set conda_path "$location"
-        set conda_base (dirname (dirname "$location"))
-        break
+# Lazy conda initialization - only init when conda command is used
+function conda
+    # Remove this function definition to prevent recursion
+    functions -e conda
+    
+    # Initialize conda on first use
+    set -l conda_path "/opt/homebrew/Caskroom/miniconda/base/bin/conda"
+    if test -f "$conda_path"
+        eval "$conda_path" "shell.fish" "hook" | source
+    else
+        # Fallback to PATH conda
+        if command -v conda >/dev/null 2>&1
+            set conda_path (command -v conda)
+            eval "$conda_path" "shell.fish" "hook" | source
+        else
+            echo "conda not found"
+            return 1
+        end
     end
-end
-
-# If no specific installation found, try conda in PATH
-if test -z "$conda_path"
-    if command -v conda >/dev/null 2>&1
-        set conda_path (command -v conda)
-        set conda_base (dirname (dirname "$conda_path"))
-    end
-end
-
-# Initialize conda if found
-if test -n "$conda_path"
-    eval "$conda_path" "shell.fish" "hook" $argv | source
-else if test -f "$conda_base/etc/fish/conf.d/conda.fish"
-    . "$conda_base/etc/fish/conf.d/conda.fish"
-else if test -n "$conda_base"
-    set -x PATH "$conda_base/bin" $PATH
+    
+    # Call conda with original arguments
+    conda $argv
 end
 
 

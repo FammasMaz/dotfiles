@@ -103,6 +103,16 @@ if command -v oh-my-posh >/dev/null 2>&1
         
         # Bind Ctrl+P to recover prompt
         bind \cp _recover_prompt
+        
+        # Smart cache cleanup - remove old cache files (older than 7 days)
+        function _cleanup_omp_cache
+            find ~/.cache/oh-my-posh -name "omp.cache.*" -mtime +7 -delete 2>/dev/null
+        end
+        
+        # Run cleanup occasionally (every 100th shell startup)
+        if test (random 1 100) -eq 1
+            _cleanup_omp_cache &
+        end
     end
 end
 

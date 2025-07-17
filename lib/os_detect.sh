@@ -212,19 +212,29 @@ show_system_info() {
 
 # Detect available user-space package managers
 detect_user_managers() {
-    USER_CONDA_CMD=$(command -v conda 2>/dev/null)
+    # Detect conda (handle missing conda gracefully for lazy loading)
+    if command -v conda >/dev/null 2>&1; then
+        USER_CONDA_CMD=$(command -v conda 2>/dev/null)
+    else
+        USER_CONDA_CMD=""
+    fi
 
+    # Detect pip
     if command -v pip3 >/dev/null 2>&1; then
         USER_PIP_CMD="pip3"
     elif command -v pip >/dev/null 2>&1; then
         USER_PIP_CMD="pip"
+    else
+        USER_PIP_CMD=""
     fi
 
-    # Also check the default cargo path in case it's not in the current shell's PATH yet
+    # Detect cargo (also check the default cargo path in case it's not in the current shell's PATH yet)
     if command -v cargo >/dev/null 2>&1; then
         USER_CARGO_CMD="cargo"
     elif [ -f "$HOME/.cargo/bin/cargo" ]; then
         USER_CARGO_CMD="$HOME/.cargo/bin/cargo"
+    else
+        USER_CARGO_CMD=""
     fi
 }
 

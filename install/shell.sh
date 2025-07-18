@@ -190,7 +190,7 @@ convert_zsh_history_to_fish() {
         # Extract commands and convert to fish format
         grep '^:' "$zsh_history" | sed 's/^:[^;]*;//' | while IFS= read -r cmd; do
             if [ -n "$cmd" ]; then
-                printf "- cmd: %s\n  when: %d\n" "$cmd" "$(date +%s)" >> "$fish_history"
+                printf -- "- cmd: %s\n  when: %d\n" "$cmd" "$(date +%s)" >> "$fish_history"
             fi
         done
         

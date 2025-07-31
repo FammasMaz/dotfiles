@@ -67,26 +67,12 @@ for plugin in "${zsh_plugins[@]}"; do
     fi
 done
 
-# Install Miniconda3 if not already installed
-if [ ! -d "$HOME/miniconda3" ]; then
-    echo "📦 Installing Miniconda3..."
-    
-    # Detect architecture
-    if [[ $(uname -m) == "arm64" ]]; then
-        MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh"
-    else
-        MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh"
-    fi
-    
-    # Download and install Miniconda
-    curl -o ~/miniconda.sh "$MINICONDA_URL"
-    bash ~/miniconda.sh -b -p "$HOME/miniconda3"
-    rm ~/miniconda.sh
-    
-    # Initialize conda
-    ~/miniconda3/bin/conda init zsh
+# Install uv for Python package management
+if ! command -v uv &> /dev/null; then
+    echo "📦 Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
 else
-    echo "✅ Miniconda3 already installed"
+    echo "✅ uv already installed"
 fi
 
 # Install GitHub Copilot CLI extension
@@ -104,7 +90,7 @@ echo "You may want to authenticate with GitHub CLI by running: gh auth login"
 
 # Verify installations
 echo "🔍 Verifying installations..."
-commands_to_check=("bat" "eza" "duf" "zoxide" "thefuck" "gh")
+commands_to_check=("bat" "eza" "duf" "zoxide" "thefuck" "gh" "uv")
 
 for cmd in "${commands_to_check[@]}"; do
     if command -v "$cmd" &> /dev/null; then
@@ -150,7 +136,9 @@ echo "📋 Next steps:"
 echo "1. Restart your terminal or run: source ~/.zshrc"
 echo "2. Authenticate with GitHub CLI: gh auth login"
 echo "3. GitHub Copilot CLI extension is now installed and ready to use with 'gh copilot suggest'"
+echo "4. Create Python projects with uv: uv init my-project"
 echo ""
 echo "💡 Note: Some tools may require additional configuration:"
 echo "   - Run 'thefuck --alias' to see fuck alias setup"
 echo "   - Run 'zoxide --help' to learn about z command usage"
+echo "   - Run 'uv --help' to learn about Python package management with uv"

@@ -120,10 +120,14 @@ fish -c "fisher install jethrokuan/z" 2>/dev/null || echo "⚠️  z plugin inst
 fish -c "fisher install PatrickF1/fzf.fish" 2>/dev/null || echo "⚠️  fzf.fish plugin installation failed or already installed"
 fish -c "fisher install EHfive/fish-bash2env" 2>/dev/null || echo "⚠️  bass (bash2env) plugin installation failed or already installed"
 
-# install miniconda and other packages using brew if mac
+# install uv and other packages using brew if mac
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "📦 Installing miniconda..."
-    brew install miniconda
+    echo "📦 Installing uv for Python package management..."
+    if ! command -v uv &> /dev/null; then
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    else
+        echo "✅ uv already installed"
+    fi
     # install other packages
     echo "📦 Installing other packages..."
     brew install eza bat duf zoxide gh thefuck

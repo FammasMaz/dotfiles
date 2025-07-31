@@ -1,8 +1,7 @@
 # macOS-specific packages (Homebrew)
 # One package per line, comments start with #
 
-# Python environment
-miniconda
+# Python environment (using uv instead of conda)
 
 # Zsh plugins (available via Homebrew on macOS)
 zsh-autosuggestions

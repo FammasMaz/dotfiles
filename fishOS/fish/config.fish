@@ -61,18 +61,11 @@ if test -f "/usr/share/Modules/init/fish"
     end
 end
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-set -g conda_auto_activate_base false
-if test -f "$HOME/miniconda3/bin/conda"
-    eval "$HOME/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
-else if test -f "/opt/homebrew/bin/conda"
-    eval "/opt/homebrew/bin/conda" "shell.fish" "hook" $argv | source
-else
-    if test -f "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
-        . "$HOME/miniconda3/etc/fish/conf.d/conda.fish"
-    else
-        set -x PATH "$HOME/miniconda3/bin" $PATH
+# uv for Python package management
+if command -v uv >/dev/null 2>&1
+    # Add uv completions if available
+    if test -f "$HOME/.local/share/uv/completion/uv.fish"
+        source "$HOME/.local/share/uv/completion/uv.fish"
     end
 end
 

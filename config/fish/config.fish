@@ -109,48 +109,11 @@ if test -f "/usr/share/Modules/init/fish"
     end
 end
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-set -g conda_auto_activate_base false
-
-# Lazy conda initialization - only init when conda command is used
-function conda
-    # Remove this function definition to prevent recursion
-    functions -e conda
-    
-    # Initialize conda on first use
-    set -l conda_path ""
-    
-    # Check common conda installation paths
-    set -l conda_paths \
-        "/opt/homebrew/Caskroom/miniconda/base/bin/conda" \
-        "$HOME/miniconda3/bin/conda" \
-        "$HOME/miniconda/bin/conda" \
-        "$HOME/anaconda3/bin/conda" \
-        "$HOME/anaconda/bin/conda"
-    
-    for path in $conda_paths
-        if test -f "$path"
-            set conda_path "$path"
-            break
-        end
-    end
-    
-    # If not found in common paths, try PATH
-    if test -z "$conda_path"
-        if command -v conda >/dev/null 2>&1
-            set conda_path (command -v conda)
-        end
-    end
-    
-    # Initialize conda if found
-    if test -n "$conda_path"
-        eval "$conda_path" "shell.fish" "hook" | source
-        # Call conda with original arguments
-        conda $argv
-    else
-        echo "conda not found in common paths or PATH"
-        return 1
+# uv for Python package management
+if command -v uv >/dev/null 2>&1
+    # Add uv completions if available
+    if test -f "$HOME/.local/share/uv/completion/uv.fish"
+        source "$HOME/.local/share/uv/completion/uv.fish"
     end
 end
 

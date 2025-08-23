@@ -46,8 +46,8 @@ end
 
 # Oh My Posh
 if command -v oh-my-posh >/dev/null 2>&1
-    if test -f "$HOME/.dotfiles/themes/atomic.omp.json"
-        oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" | source
+    if test -f "$HOME/.dotfiles/themes/bubblesextra.omp.json"
+        oh-my-posh init fish --config "$HOME/.dotfiles/themes/bubblesextra.omp.json" | source
         
         # Fix for prompt disappearing after Ctrl+C
         function _fix_prompt_after_interrupt --on-signal SIGINT

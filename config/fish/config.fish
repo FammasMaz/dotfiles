@@ -124,6 +124,68 @@ if test -f ~/.orbstack/shell/init2.fish
     source ~/.orbstack/shell/init2.fish 2>/dev/null
 end
 
+# Title functions for terminal window titles
+function __title_join --description "join args with bullet"
+    set -l out
+    for a in $argv
+        test -n "$a"; and set out $out $a
+    end
+    echo (string join " • " $out)
+end
+
+function __title_git
+    command -q git; or return
+    git rev-parse --is-inside-work-tree 2>/dev/null; or return
+    set -l branch (command git symbolic-ref --quiet --short HEAD 2>/dev/null); or set branch (command git describe --tags --always 2>/dev/null)
+    test -n "$branch"; and echo "git:$branch"
+end
+
+function __title_py
+    if set -q VIRTUAL_ENV
+        echo "py:"(basename "$VIRTUAL_ENV")
+    else if set -q CONDA_DEFAULT_ENV
+        echo "py:"$CONDA_DEFAULT_ENV
+    end
+end
+
+function __title_k8s
+    command -q kubectl; or return
+    set -l ctx (kubectl config current-context 2>/dev/null); or return
+    set -l ns (kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+    test -n "$ns"; and echo "k8s:$ctx:$ns"; or echo "k8s:$ctx"
+end
+
+function __title_aws
+    if set -q AWS_PROFILE
+        if set -q AWS_REGION
+            echo "aws:$AWS_PROFILE@$AWS_REGION"
+        else if set -q AWS_DEFAULT_REGION
+            echo "aws:$AWS_PROFILE@$AWS_DEFAULT_REGION"
+        else
+            echo "aws:$AWS_PROFILE"
+        end
+    end
+end
+
+function fish_title
+    set -l where (prompt_pwd)                              # ~/…/dir
+    set -l hostseg
+    # Check for SSH connection using multiple methods
+    if set -q SSH_TTY; or set -q SSH_CLIENT; or set -q SSH_CONNECTION
+        set hostseg (whoami)"@"(hostname -s)
+    end
+    set -l tmuxseg
+    if set -q TMUX
+        set tmuxseg "tmux:"(tmux display-message -p '#S' 2>/dev/null)
+    end
+    set -l sudoseg
+    if set -q SUDO_USER
+        set sudoseg "sudo:"$SUDO_USER
+    end
+
+    __title_join $hostseg $tmuxseg $sudoseg (__title_git) (__title_py) (__title_k8s) (__title_aws) $where
+end
+
 # --- Local & Machine-Specific Overrides ---
 # For settings that should NOT be in git (secrets, machine-specific paths, work configs)
 # Add .fish files to ~/.config/fish/local.d/

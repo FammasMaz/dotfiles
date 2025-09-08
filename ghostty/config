@@ -1,9 +1,16 @@
-theme = light:material,dark:vesper
+theme = light:flexoki-light,dark:Kanagawa Dragon
 font-family = "CaskaydiaMono Nerd Font Mono"
-cursor-style = block
 window-height = 30
 window-width = 120
-shell-integration = zsh
-shell-integration-features = no-cursor
 macos-titlebar-style = tabs
 auto-update-channel = tip
+shell-integration = fish
+shell-integration-features = no-cursor,sudo, title
+background-opacity = 0.85
+background-blur = true
+window-colorspace = display-p3
+window-padding-balance = true
+window-padding-x = 6
+window-padding-y = 4
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+scrollback-limit = 134217728

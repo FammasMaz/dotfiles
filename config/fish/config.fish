@@ -135,17 +135,9 @@ end
 
 function __title_git
     command -q git; or return
-    git rev-parse --is-inside-work-tree 2>/dev/null; or return
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1; or return
     set -l branch (command git symbolic-ref --quiet --short HEAD 2>/dev/null); or set branch (command git describe --tags --always 2>/dev/null)
     test -n "$branch"; and echo "git:$branch"
-end
-
-function __title_py
-    if set -q VIRTUAL_ENV
-        echo "py:"(basename "$VIRTUAL_ENV")
-    else if set -q CONDA_DEFAULT_ENV
-        echo "py:"$CONDA_DEFAULT_ENV
-    end
 end
 
 function __title_k8s
@@ -168,6 +160,10 @@ function __title_aws
 end
 
 function fish_title
+    set -l cmd
+    if set -q argv[1]
+        set cmd $argv[1]
+    end
     set -l where (prompt_pwd)                              # ~/…/dir
     set -l hostseg
     # Check for SSH connection using multiple methods
@@ -182,8 +178,7 @@ function fish_title
     if set -q SUDO_USER
         set sudoseg "sudo:"$SUDO_USER
     end
-
-    __title_join $hostseg $tmuxseg $sudoseg (__title_git) (__title_py) (__title_k8s) (__title_aws) $where
+    __title_join $cmd $hostseg $tmuxseg $sudoseg (__title_git) (__title_k8s) (__title_aws) $where
 end
 
 # --- Local & Machine-Specific Overrides ---

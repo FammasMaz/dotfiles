@@ -162,7 +162,7 @@ end
 function fish_title
     set -l cmd
     if set -q argv[1]
-        set cmd $argv[1]
+        set cmd (string match -r '^[^ ]+' -- $argv[1])
     end
     set -l where (prompt_pwd)                              # ~/…/dir
     set -l hostseg

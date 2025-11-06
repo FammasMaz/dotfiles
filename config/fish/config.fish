@@ -162,7 +162,49 @@ end
 function fish_title
     set -l cmd
     if set -q argv[1]
-        set cmd (string match -r '^[^ ]+' -- $argv[1])
+        set -l raw (string trim -- $argv[1])
+        set -l words (string split --no-empty ' ' -- $raw)
+        set -l sudo_opts_with_arg -u --user -g --group -h --host -p --prompt -C --close-from -D --chdir -r --role -t --type -U --other-user
+        set -l in_sudo 0
+        set -l skip_next 0
+        for word in $words
+            if test $skip_next -eq 1
+                set skip_next 0
+                continue
+            end
+            if test $in_sudo -eq 0
+                if test "$word" = "sudo"
+                    set in_sudo 1
+                    continue
+                end
+                set cmd $word
+                break
+            else
+                if test "$word" = "--"
+                    set in_sudo 0
+                    continue
+                end
+                if string match -qr '^-[ugCDrtUp].+' -- $word
+                    continue
+                end
+                if string match -qr '^--(user|group|host|prompt|close-from|chdir|role|type|other-user)=' -- $word
+                    continue
+                end
+                if contains -- $word $sudo_opts_with_arg
+                    set skip_next 1
+                    continue
+                end
+                if string match -qr '^-' -- $word
+                    continue
+                end
+                set cmd $word
+                break
+            end
+        end
+        if test -z "$cmd"
+            and test (count $words) -gt 0
+            set cmd $words[1]
+        end
     end
     set -l where (prompt_pwd)                              # ~/…/dir
     set -l hostseg

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Zsh Setup Script for Linux
-# This script installs zsh, sets it as default, installs plugins, and oh-my-posh
+# This script installs zsh, sets it as default, installs plugins, and configures the Starship prompt
 
 set -e  # Exit on any error
 
@@ -138,22 +138,27 @@ install_syntax_highlighting() {
     print_status "zsh-syntax-highlighting installed successfully!"
 }
 
-# Function to install oh-my-posh
-install_oh_my_posh() {
-    print_step "Installing oh-my-posh..."
+# Function to install starship prompt
+install_starship() {
+    if command -v starship >/dev/null 2>&1; then
+        print_status "Starship already installed"
+        return
+    fi
+    
+    print_step "Installing starship prompt..."
     
     # Create local bin directory
     mkdir -p ~/.local/bin
     
-    # Download and install oh-my-posh
-    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+    # Download and install starship
+    curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin
     
-    # Add to PATH if not already there
-    if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+    if [ -f "$HOME/.local/bin/starship" ]; then
+        chmod +x "$HOME/.local/bin/starship"
+        print_status "Starship installed successfully!"
+    else
+        print_warning "Unable to verify starship installation. Check the install script output."
     fi
-    
-    print_status "oh-my-posh installed successfully!"
 }
 
 # Function to create/update .zshrc
@@ -203,9 +208,10 @@ fi
 # Add local bin to PATH
 export PATH="$HOME/.local/bin:$PATH"
 
-# Initialize oh-my-posh with atomic theme
-if command -v oh-my-posh &> /dev/null; then
-    eval "$(oh-my-posh init zsh --config $HOME/.dotfiles/themes/atomic.omp.json)"
+# Starship prompt
+if command -v starship &> /dev/null; then
+    export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+    eval "$(starship init zsh)"
 fi
 
 # Initialize zoxide
@@ -239,36 +245,26 @@ EOF
     print_status ".zshrc configuration created!"
 }
 
-# Function to setup oh-my-posh themes
-setup_oh_my_posh_themes() {
-    print_step "Setting up oh-my-posh themes..."
+# Function to link starship configuration
+setup_starship_config() {
+    print_step "Linking Starship configuration..."
     
-    # Create themes directory
-    mkdir -p ~/.cache/oh-my-posh/themes
-    
-    # Get the directory where this script is located
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    DOTFILES_DIR="$SCRIPT_DIR/.."
     
-    # Set up symlink to dotfiles directory for easy access
+    # Ensure dotfiles symlink exists for convenience
     if [ ! -L "$HOME/.dotfiles" ]; then
-        ln -sf "$SCRIPT_DIR/.." "$HOME/.dotfiles"
+        ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
         print_status "Created symlink to dotfiles directory at ~/.dotfiles"
     fi
     
-    # Copy the atomic theme from the themes directory if it exists
-    if [ -f "$SCRIPT_DIR/../themes/atomic.omp.json" ]; then
-        # Also copy to cache for backward compatibility
-        cp "$SCRIPT_DIR/../themes/atomic.omp.json" ~/.cache/oh-my-posh/themes/atomic.omp.json
-        print_status "Copied atomic.omp.json theme from themes directory"
+    if [ -f "$DOTFILES_DIR/config/starship/starship.toml" ]; then
+        mkdir -p ~/.config/starship
+        ln -sf "$DOTFILES_DIR/config/starship/starship.toml" ~/.config/starship/starship.toml
+        print_status "Starship configuration linked from dotfiles"
     else
-        print_warning "atomic.omp.json not found in themes directory, downloading agnoster theme as fallback"
-        curl -s https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/agnoster.omp.json -o ~/.cache/oh-my-posh/themes/atomic.omp.json
+        print_warning "Starship configuration not found in dotfiles repository"
     fi
-    
-    print_status "oh-my-posh theme setup complete!"
-    print_status "Using atomic theme from ~/.dotfiles/themes/atomic.omp.json as default"
-    print_status "You can change themes by modifying the oh-my-posh config line in ~/.zshrc"
-    print_status "Available themes: https://ohmyposh.dev/docs/themes"
 }
 
 # Main execution
@@ -302,12 +298,12 @@ main() {
     install_autosuggestions
     install_syntax_highlighting
     
-    # Install oh-my-posh
-    install_oh_my_posh
+    # Install starship prompt
+    install_starship
     
     # Setup configuration
     setup_zshrc
-    setup_oh_my_posh_themes
+    setup_starship_config
     
     echo
     print_status "✅ Zsh setup completed successfully!"
@@ -315,11 +311,11 @@ main() {
     print_status "Next steps:"
     echo "  1. Log out and log back in (or restart your terminal)"
     echo "  2. Your new shell will be zsh with autosuggestions and syntax highlighting"
-    echo "  3. oh-my-posh is configured with the atomic theme"
-    echo "  4. You can customize your setup by editing ~/.zshrc"
+    echo "  3. Starship prompt is configured with your dotfiles theme"
+    echo "  4. You can customize your setup by editing ~/.config/starship/starship.toml"
     echo
     print_status "To test immediately, run: exec zsh"
 }
 
 # Run main function
-main "$@" 
+main "$@"

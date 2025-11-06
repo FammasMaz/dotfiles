@@ -39,9 +39,10 @@ if command -v zoxide >/dev/null 2>&1
     zoxide init fish --cmd cd | source
 end
 
-# Oh My Posh
-if command -v oh-my-posh >/dev/null 2>&1
-    oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" | source
+# Starship prompt
+if command -v starship >/dev/null 2>&1
+    set -x STARSHIP_CONFIG "$HOME/.config/starship/starship.toml"
+    starship init fish | source
 end
 
 # OrbStack

@@ -44,52 +44,10 @@ if command -v zoxide >/dev/null 2>&1
     zoxide init fish --cmd cd | source
 end
 
-# Oh My Posh
-if command -v oh-my-posh >/dev/null 2>&1
-    if test -f "$HOME/.dotfiles/themes/bubblesextra.omp.json"
-        oh-my-posh init fish --config "$HOME/.dotfiles/themes/bubblesextra.omp.json" | source
-        
-        # Fix for prompt disappearing after Ctrl+C
-        function _fix_prompt_after_interrupt --on-signal SIGINT
-            # Force prompt repaint after interrupt signal
-            if functions -q _omp_new_prompt
-                set -g _omp_new_prompt 1
-            end
-            # Trigger a new prompt
-            commandline -f repaint
-        end
-        
-        # Fallback prompt if oh-my-posh fails
-        function _fallback_prompt
-            set -l last_status $status
-            set -l user (whoami)
-            set -l hostname (hostname -s)
-            set -l pwd_short (string replace -r "^$HOME" "~" (pwd))
-            
-            if test $last_status -eq 0
-                echo -n "$user@$hostname:$pwd_short\$ "
-            else
-                echo -n "$user@$hostname:$pwd_short [$last_status]\$ "
-            end
-        end
-        
-        # Manual prompt recovery function (bind to Ctrl+P)
-        function _recover_prompt
-            if functions -q _omp_new_prompt
-                set -g _omp_new_prompt 1
-            end
-            if functions -q _omp_current_prompt
-                set -g _omp_current_prompt ""
-            end
-            if functions -q _omp_current_rprompt
-                set -g _omp_current_rprompt ""
-            end
-            commandline -f repaint
-        end
-        
-        # Bind Ctrl+P to recover prompt
-        bind \cp _recover_prompt
-    end
+# Starship prompt
+if command -v starship >/dev/null 2>&1
+    set -x STARSHIP_CONFIG "$HOME/.config/starship/starship.toml"
+    starship init fish | source
 end
 
 # OrbStack

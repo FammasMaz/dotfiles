@@ -81,28 +81,27 @@ install_eza() {
     echo "✅ eza installed"
 }
 
-# Function to install oh-my-posh
-install_oh_my_posh() {
-    if [ -f "$HOME/.local/bin/oh-my-posh" ]; then
-        echo "✅ oh-my-posh already installed locally"
+# Function to install starship prompt
+install_starship() {
+    if command -v starship >/dev/null 2>&1; then
+        echo "✅ starship already available"
         return
     fi
     
-    echo "📦 Installing oh-my-posh..."
+    if [ -f "$HOME/.local/bin/starship" ]; then
+        echo "✅ starship already installed locally"
+        return
+    fi
     
-    # Detect architecture
-    ARCH=$(uname -m)
-    case $ARCH in
-        x86_64) ARCH="amd64" ;;
-        aarch64) ARCH="arm64" ;;
-        armv7l) ARCH="arm" ;;
-        *) echo "❌ Unsupported architecture: $ARCH"; return ;;
-    esac
-    
-    # Download and install
-    curl -L "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-$ARCH" -o "$HOME/.local/bin/oh-my-posh"
-    chmod +x "$HOME/.local/bin/oh-my-posh"
-    echo "✅ oh-my-posh installed"
+    echo "📦 Installing starship..."
+    mkdir -p "$HOME/.local/bin"
+    curl -sS https://starship.rs/install.sh | sh -s -- -b "$HOME/.local/bin" >/dev/null
+    if [ -f "$HOME/.local/bin/starship" ]; then
+        chmod +x "$HOME/.local/bin/starship"
+        echo "✅ starship installed"
+    else
+        echo "❌ Failed to install starship"
+    fi
 }
 
 # Function to install zoxide
@@ -351,7 +350,7 @@ export PATH="$HOME/.local/bin:$PATH"
 echo "🔧 Installing enhanced tools locally..."
 install_bat
 install_eza
-install_oh_my_posh
+install_starship
 install_zoxide
 install_duf
 
@@ -380,6 +379,13 @@ echo "📦 Installing fish plugins..."
 if [ ! -L "$HOME/.dotfiles" ]; then
     ln -sf "$DOTFILES_DIR" "$HOME/.dotfiles"
     echo "✅ Created symlink to dotfiles directory at ~/.dotfiles"
+fi
+
+# Link starship configuration
+if [ -f "$DOTFILES_DIR/config/starship/starship.toml" ]; then
+    mkdir -p "$HOME/.config/starship"
+    ln -sf "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
+    echo "✅ Linked starship configuration"
 fi
 
 # Create server-specific config.fish
@@ -417,9 +423,10 @@ alias cd='z'
 # Zoxide
 zoxide init fish | source
 
-# Oh My Posh
-if test -f "$HOME/.dotfiles/themes/atomic.omp.json"
-    oh-my-posh init fish --config "$HOME/.dotfiles/themes/atomic.omp.json" | source
+# Starship prompt
+if command -v starship >/dev/null 2>&1
+    set -x STARSHIP_CONFIG "$HOME/.config/starship/starship.toml"
+    starship init fish | source
 end
 
 # Environment Modules (common on HPC systems)
@@ -501,6 +508,6 @@ echo "3. Or simply start fish manually: ~/.local/bin/fish"
 echo ""
 echo "📁 Fish binary: $HOME/.local/bin/fish"
 echo "📁 Configuration: $HOME/.config/fish/config.fish"
-echo "📁 Enhanced tools: ~/.local/bin/{bat,eza,oh-my-posh,zoxide,duf}"
+echo "📁 Enhanced tools: ~/.local/bin/{bat,eza,starship,zoxide,duf}"
 echo "🚀 All tools installed as pre-compiled binaries - no build tools required!"
 echo "📁 Dotfiles link: $HOME/.dotfiles"

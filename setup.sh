@@ -216,9 +216,9 @@ setup_development_environment() {
         log_debug "zoxide is available and will be initialized in shell configs"
     fi
     
-    # Setup oh-my-posh theme if available
-    if command_exists oh-my-posh && [ -f "$DOTFILES_DIR/themes/atomic.omp.json" ]; then
-        safe_symlink "$DOTFILES_DIR/themes" "$HOME/.config/oh-my-posh-themes"
+    # Setup starship prompt configuration if available
+    if [ -f "$DOTFILES_DIR/config/starship/starship.toml" ]; then
+        safe_symlink "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
     fi
 }
 

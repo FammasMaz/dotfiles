@@ -403,10 +403,17 @@ handle_conda_external() {
 install_special_packages() {
     log_step "Installing special packages..."
     
-    # Install Oh My Posh if not available via package manager
-    if ! command_exists oh-my-posh && [ "$OS" = "linux" ]; then
-        log_info "Installing Oh My Posh..."
-        curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+    # Install Starship prompt if not available via package manager
+    if ! command_exists starship && [ "$OS" = "linux" ]; then
+        log_info "Installing Starship prompt..."
+        mkdir -p "$HOME/.local/bin"
+        curl -sS https://starship.rs/install.sh | sh -s -- -b "$HOME/.local/bin"
+        if [ -f "$HOME/.local/bin/starship" ]; then
+            chmod +x "$HOME/.local/bin/starship"
+            log_success "Starship installed to ~/.local/bin"
+        else
+            log_warning "Starship installation script did not produce expected binary"
+        fi
     fi
     
     # Install Miniconda on Linux (since it's not available via most package managers)

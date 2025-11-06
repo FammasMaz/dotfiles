@@ -212,33 +212,28 @@ setup_shared_configs() {
         safe_symlink "$DOTFILES_DIR/config/shared/.gitconfig" "$HOME/.gitconfig"
     fi
     
-    # Setup themes directory
-    if [ -d "$DOTFILES_DIR/themes" ]; then
-        mkdir -p "$HOME/.config"
-        safe_symlink "$DOTFILES_DIR/themes" "$HOME/.config/oh-my-posh-themes"
+    # Setup Starship configuration
+    if [ -f "$DOTFILES_DIR/config/starship/starship.toml" ]; then
+        safe_symlink "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
     fi
     
     log_success "Shared configurations setup completed"
 }
 
-# Initialize oh-my-posh if available
-setup_oh_my_posh() {
-    if ! command_exists oh-my-posh; then
-        log_debug "Oh My Posh not installed, skipping setup"
+# Initialize starship if available
+setup_starship() {
+    if ! command_exists starship; then
+        log_debug "Starship not installed, skipping setup"
         return 0
     fi
     
-    log_step "Setting up Oh My Posh..."
+    log_step "Configuring Starship prompt..."
     
-    # Ensure themes directory exists
-    mkdir -p "$HOME/.cache/oh-my-posh/themes"
-    
-    # Copy atomic theme if it exists
-    if [ -f "$DOTFILES_DIR/themes/atomic.omp.json" ]; then
-        cp "$DOTFILES_DIR/themes/atomic.omp.json" "$HOME/.cache/oh-my-posh/themes/atomic.omp.json"
-        log_success "Oh My Posh atomic theme configured"
+    if [ -f "$DOTFILES_DIR/config/starship/starship.toml" ]; then
+        safe_symlink "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
+        log_success "Starship configuration linked"
     else
-        log_debug "Atomic theme not found in themes directory"
+        log_warning "Starship config not found in dotfiles repository"
     fi
 }
 
@@ -253,8 +248,8 @@ main() {
     # Setup shared configurations first
     setup_shared_configs
     
-    # Setup Oh My Posh
-    setup_oh_my_posh
+    # Setup Starship prompt
+    setup_starship
     
     # Setup the specified shell
     case "$shell_to_setup" in

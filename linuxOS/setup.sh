@@ -51,10 +51,14 @@ for package in ${packages[$PKG_MANAGER]}; do
     fi
 done
 
-# Install Oh My Posh
-if ! command -v oh-my-posh &> /dev/null; then
-    echo "📦 Installing Oh My Posh..."
-    curl -s https://ohmyposh.dev/install.sh | bash -s -- -d ~/.local/bin
+# Install Starship prompt
+if ! command -v starship &> /dev/null; then
+    echo "📦 Installing Starship prompt..."
+    mkdir -p "$HOME/.local/bin"
+    curl -sS https://starship.rs/install.sh | sh -s -- -b "$HOME/.local/bin"
+    if [ -f "$HOME/.local/bin/starship" ]; then
+        chmod +x "$HOME/.local/bin/starship"
+    fi
     # Add to PATH for current session
     export PATH="$HOME/.local/bin:$PATH"
 fi

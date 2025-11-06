@@ -27,7 +27,9 @@ $pixi\
 $fill\
 [](fg:color_purple)\
 $battery\
-[\ue0c8](bg:color_bg1 fg:color_purple)\
+[\ue0c8](bg:color_yellow fg:color_purple)\
+$cmd_duration\
+[\ue0c8](bg:color_bg1 fg:color_yellow)\
 $time\
 [ ](fg:color_bg1)\
 
@@ -219,3 +221,8 @@ style = "bg:color_orange"
 [[battery.display]]
 threshold = 100
 style = "bg:color_green"
+
+[cmd_duration]
+min_time = 500
+format = '[[ 󰔛 $duration ](fg:color_fg0 bg:color_yellow)]($style)'
+style = "bg:color_yellow"

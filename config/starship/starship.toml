@@ -4,12 +4,12 @@ format = """
 [](color_orange)\
 $os\
 $username\
-[](bg:color_yellow fg:color_orange)\
+[\ue0b0](bg:color_yellow fg:color_orange)\
 $directory\
-[](fg:color_yellow bg:color_aqua)\
+[\ue0b0](fg:color_yellow bg:color_aqua)\
 $git_branch\
 $git_status\
-[](fg:color_aqua bg:color_blue)\
+[\ue0b0](fg:color_aqua bg:color_blue)\
 $c\
 $cpp\
 $rust\
@@ -20,13 +20,17 @@ $java\
 $kotlin\
 $haskell\
 $python\
-[](fg:color_blue bg:color_bg3)\
+[](fg:color_blue)\
 $docker_context\
 $conda\
 $pixi\
-[](fg:color_bg3 bg:color_bg1)\
+$fill\
+[](fg:color_purple)\
+$battery\
+[\ue0b2](bg:color_purple fg:color_bg1)\
 $time\
 [ ](fg:color_bg1)\
+
 $line_break$character"""
 
 palette = 'gruvbox_dark'
@@ -53,7 +57,7 @@ Ubuntu = "󰕈"
 SUSE = ""
 Raspbian = "󰐿"
 Mint = "󰣭"
-Macos = "󰀵"
+Macos = "󰀵 "
 Manjaro = ""
 Linux = "󰌽"
 Gentoo = "󰣨"
@@ -72,7 +76,7 @@ RedHatEnterprise = "󱄛"
 Pop = ""
 
 [username]
-show_always = true
+show_always = false
 style_user = "bg:color_orange fg:color_fg0"
 style_root = "bg:color_orange fg:color_fg0"
 format = '[ $user ]($style)'
@@ -142,12 +146,12 @@ format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
 [haskell]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version ) ](fg:color_fg0 bg:color_blue)]($style)'
 
 [python]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $virtualenv: $version) ](fg:color_fg0 bg:color_blue)]($style)'
 
 [docker_context]
 symbol = ""
@@ -162,9 +166,13 @@ format = '[[ $symbol( $environment) ](fg:#83a598 bg:color_bg3)]($style)'
 style = "bg:color_bg3"
 format = '[[ $symbol( $version)( $environment) ](fg:color_fg0 bg:color_bg3)]($style)'
 
+[fill]
+symbol = " "
+style = "bold black"
+
 [time]
 disabled = false
-time_format = "%R"
+time_format = "%m-%d %R"
 style = "bg:color_bg1"
 format = '[[  $time ](fg:color_fg0 bg:color_bg1)]($style)'
 
@@ -179,3 +187,24 @@ vimcmd_symbol = '[](bold fg:color_green)'
 vimcmd_replace_one_symbol = '[](bold fg:color_purple)'
 vimcmd_replace_symbol = '[](bold fg:color_purple)'
 vimcmd_visual_symbol = '[](bold fg:color_yellow)'
+
+[battery]
+disabled = false
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰁽 "
+empty_symbol = "󰂎 "
+format = "[[ $symbol$percentage ](fg:color_fg0 bg:color_purple)]($style)"
+
+[[battery.display]]
+threshold = 10
+style = "bg:color_red"
+
+[[battery.display]]
+threshold = 30
+style = "bg:color_orange"
+
+[[battery.display]]
+threshold = 100
+style = "bg:color_green"

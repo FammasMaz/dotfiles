@@ -15,7 +15,7 @@ echo "🚀 Starting macOS setup for .zshrc dependencies..."
 if ! command -v brew &> /dev/null; then
     echo "📦 Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    
+
     # Add Homebrew to PATH for Apple Silicon Macs
     if [[ $(uname -m) == "arm64" ]]; then
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
@@ -33,11 +33,13 @@ brew update
 echo "📦 Installing command-line tools..."
 brew_packages=(
     "bat"           # Modern cat replacement
-    "eza"           # Modern ls replacement  
+    "eza"           # Modern ls replacement
     "duf"           # Modern df replacement
     "zoxide"        # Smart cd command
     "thefuck"       # Command correction tool
     "gh"            # GitHub CLI
+    "atuin"
+    "fzf" # Shell history sync tool
 )
 
 for package in "${brew_packages[@]}"; do
@@ -90,7 +92,7 @@ echo "You may want to authenticate with GitHub CLI by running: gh auth login"
 
 # Verify installations
 echo "🔍 Verifying installations..."
-commands_to_check=("bat" "eza" "duf" "zoxide" "thefuck" "gh" "uv")
+commands_to_check=("bat" "eza" "duf" "zoxide" "thefuck" "gh" "atuin" "uv")
 
 for cmd in "${commands_to_check[@]}"; do
     if command -v "$cmd" &> /dev/null; then

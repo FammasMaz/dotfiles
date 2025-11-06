@@ -4,12 +4,12 @@ format = """
 [](color_orange)\
 $os\
 $username\
-[\ue0b0](bg:color_yellow fg:color_orange)\
+[\ue0c8](bg:color_yellow fg:color_orange)\
 $directory\
-[\ue0b0](fg:color_yellow bg:color_aqua)\
+[\ue0c8](fg:color_yellow bg:color_aqua)\
 $git_branch\
 $git_status\
-[\ue0b0](fg:color_aqua bg:color_blue)\
+[\ue0c8](fg:color_aqua bg:color_blue)\
 $c\
 $cpp\
 $rust\
@@ -27,7 +27,7 @@ $pixi\
 $fill\
 [](fg:color_purple)\
 $battery\
-[\ue0b2](bg:color_purple fg:color_bg1)\
+[\ue0c8](bg:color_bg1 fg:color_purple)\
 $time\
 [ ](fg:color_bg1)\
 
@@ -151,7 +151,7 @@ format = '[[ $symbol( $version ) ](fg:color_fg0 bg:color_blue)]($style)'
 [python]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $virtualenv: $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $virtualenv) ](fg:color_fg0 bg:color_blue)]($style)'
 
 [docker_context]
 symbol = ""
@@ -160,7 +160,7 @@ format = '[[ $symbol( $context) ](fg:#83a598 bg:color_bg3)]($style)'
 
 [conda]
 style = "bg:color_bg3"
-format = '[[ $symbol( $environment) ](fg:#83a598 bg:color_bg3)]($style)'
+format = '[[ $symbol( $environment ) ](fg:#83a598 bg:color_bg3)]($style)'
 
 [pixi]
 style = "bg:color_bg3"

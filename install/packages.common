@@ -13,6 +13,8 @@ eza
 duf
 zoxide
 thefuck
+fzf
+atuin
 
 # Development tools
 gh

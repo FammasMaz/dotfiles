@@ -202,3 +202,17 @@ if test -d "$local_config_dir"
         end
     end
 end
+# AGENTS
+alias opencode="bunx opencode-ai@latest"
+alias opencode-tui="bunx opencode-ai@opentui"
+alias codex="bunx @openai/codex@latest"
+alias ccusage="bunx ccusage@latest"
+alias codexusage="bunx @ccusage/codex@latest"
+# alias gemini="bunx @google/gemini-cli@latest"
+alias copilot="bunx @github/copilot@latest"
+alias cursor-cli="cursor-agent update && cursor-agent"
+alias uwu="uwu-cli"
+alias crush="bunx @charmland/crush@latest"
+
+fish_add_path $HOME/.cargo/bin
+export OPENCODE_DISABLE_DEFAULT_PLUGINS=1

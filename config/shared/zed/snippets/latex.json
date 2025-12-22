@@ -1,0 +1,1502 @@
+{
+  "Greek alpha": {
+    "prefix": "@a",
+    "body": "\\alpha"
+  },
+  "Greek beta": {
+    "prefix": "@b",
+    "body": "\\beta"
+  },
+  "Greek gamma": {
+    "prefix": "@g",
+    "body": "\\gamma"
+  },
+  "Greek delta": {
+    "prefix": "@d",
+    "body": "\\delta"
+  },
+  "Greek epsilon": {
+    "prefix": "@e",
+    "body": "\\epsilon"
+  },
+  "Greek varepsilon": {
+    "prefix": "@ve",
+    "body": "\\varepsilon"
+  },
+  "Greek zeta": {
+    "prefix": "@z",
+    "body": "\\zeta"
+  },
+  "Greek eta": {
+    "prefix": "@h",
+    "body": "\\eta"
+  },
+  "Greek theta": {
+    "prefix": "@q",
+    "body": "\\theta"
+  },
+  "Greek vartheta": {
+    "prefix": "@vq",
+    "body": "\\vartheta"
+  },
+  "Greek iota": {
+    "prefix": "@i",
+    "body": "\\iota"
+  },
+  "Greek kappa": {
+    "prefix": "@k",
+    "body": "\\kappa"
+  },
+  "Greek lambda": {
+    "prefix": "@l",
+    "body": "\\lambda"
+  },
+  "Greek mu": {
+    "prefix": "@m",
+    "body": "\\mu"
+  },
+  "Greek nu": {
+    "prefix": "@n",
+    "body": "\\nu"
+  },
+  "Greek xi": {
+    "prefix": "@x",
+    "body": "\\xi"
+  },
+  "Greek pi": {
+    "prefix": "@p",
+    "body": "\\pi"
+  },
+  "Greek varpi": {
+    "prefix": "@vp",
+    "body": "\\varpi"
+  },
+  "Greek rho": {
+    "prefix": "@r",
+    "body": "\\rho"
+  },
+  "Greek varrho": {
+    "prefix": "@vr",
+    "body": "\\varrho"
+  },
+  "Greek sigma": {
+    "prefix": "@s",
+    "body": "\\sigma"
+  },
+  "Greek varsigma": {
+    "prefix": "@vs",
+    "body": "\\varsigma"
+  },
+  "Greek tau": {
+    "prefix": "@t",
+    "body": "\\tau"
+  },
+  "Greek upsilon": {
+    "prefix": "@u",
+    "body": "\\upsilon"
+  },
+  "Greek phi": {
+    "prefix": "@f",
+    "body": "\\phi"
+  },
+  "Greek varphi": {
+    "prefix": "@vf",
+    "body": "\\varphi"
+  },
+  "Greek chi": {
+    "prefix": "@c",
+    "body": "\\chi"
+  },
+  "Greek psi": {
+    "prefix": "@y",
+    "body": "\\psi"
+  },
+  "Greek omega": {
+    "prefix": "@w",
+    "body": "\\omega"
+  },
+  "Greek Gamma": {
+    "prefix": "@G",
+    "body": "\\Gamma"
+  },
+  "Greek Delta": {
+    "prefix": "@D",
+    "body": "\\Delta"
+  },
+  "Greek Theta": {
+    "prefix": "@Q",
+    "body": "\\Theta"
+  },
+  "Greek Lambda": {
+    "prefix": "@L",
+    "body": "\\Lambda"
+  },
+  "Greek Xi": {
+    "prefix": "@X",
+    "body": "\\Xi"
+  },
+  "Greek Pi": {
+    "prefix": "@P",
+    "body": "\\Pi"
+  },
+  "Greek Sigma": {
+    "prefix": "@S",
+    "body": "\\Sigma"
+  },
+  "Greek Upsilon": {
+    "prefix": "@U",
+    "body": "\\Upsilon"
+  },
+  "Greek Phi": {
+    "prefix": "@F",
+    "body": "\\Phi"
+  },
+  "Greek Psi": {
+    "prefix": "@Y",
+    "body": "\\Psi"
+  },
+  "Greek Omega": {
+    "prefix": "@W",
+    "body": "\\Omega"
+  },
+  "Font textnormal": {
+    "prefix": "FNO",
+    "body": "\\textnormal{$1}$0"
+  },
+  "Font textrm": {
+    "prefix": "FRM",
+    "body": "\\textrm{$1}$0"
+  },
+  "Font emph": {
+    "prefix": "FEM",
+    "body": "\\emph{$1}$0"
+  },
+  "Font textsf": {
+    "prefix": "FSF",
+    "body": "\\textsf{$1}$0"
+  },
+  "Font texttt": {
+    "prefix": "FTT",
+    "body": "\\texttt{$1}$0"
+  },
+  "Font textit": {
+    "prefix": "FIT",
+    "body": "\\textit{$1}$0"
+  },
+  "Font textsl": {
+    "prefix": "FSL",
+    "body": "\\textsl{$1}$0"
+  },
+  "Font textsc": {
+    "prefix": "FSC",
+    "body": "\\textsc{$1}$0"
+  },
+  "Font underline": {
+    "prefix": "FUL",
+    "body": "\\underline{$1}$0"
+  },
+  "Font uppercase": {
+    "prefix": "FUC",
+    "body": "\\uppercase{$1}$0"
+  },
+  "Font lowercase": {
+    "prefix": "FLC",
+    "body": "\\lowercase{$1}$0"
+  },
+  "Font textbf": {
+    "prefix": "FBF",
+    "body": "\\textbf{$1}$0"
+  },
+  "Font textsuperscript": {
+    "prefix": "FSS",
+    "body": "\\textsuperscript{$1}$0"
+  },
+  "Font textsubscript": {
+    "prefix": "FBS",
+    "body": "\\textsubscript{$1}$0"
+  },
+  "Math font mathrm": {
+    "prefix": "MRM",
+    "body": "\\mathrm{$1}$0"
+  },
+  "Math font mathsf": {
+    "prefix": "MSF",
+    "body": "\\mathsf{$1}$0"
+  },
+  "Math font mathbf": {
+    "prefix": "MBF",
+    "body": "\\mathbf{$1}$0"
+  },
+  "Math font mathbb": {
+    "prefix": "MBB",
+    "body": "\\mathbb{$1}$0"
+  },
+  "Math font mathcal": {
+    "prefix": "MCA",
+    "body": "\\mathcal{$1}$0"
+  },
+  "Math font mathit": {
+    "prefix": "MIT",
+    "body": "\\mathit{$1}$0"
+  },
+  "Math font mathtt": {
+    "prefix": "MTT",
+    "body": "\\mathtt{$1}$0"
+  },
+  "Math font mathfrak": {
+    "prefix": "MFR",
+    "body": "\\mathfrak{$1}$0"
+  },
+  "Math font mathscr": {
+    "prefix": "MSC",
+    "body": "\\mathscr{$1}$0"
+  },
+  "At mathrm": {
+    "prefix": "@rm",
+    "body": "\\mathrm{$1}$0"
+  },
+  "At mathit": {
+    "prefix": "@it",
+    "body": "\\mathit{$1}$0"
+  },
+  "At mathbf": {
+    "prefix": "@bf",
+    "body": "\\mathbf{$1}$0"
+  },
+  "At mathsf": {
+    "prefix": "@sf",
+    "body": "\\mathsf{$1}$0"
+  },
+  "At mathtt": {
+    "prefix": "@tt",
+    "body": "\\mathtt{$1}$0"
+  },
+  "At mathcal": {
+    "prefix": "@cal",
+    "body": "\\mathcal{$1}$0"
+  },
+  "At mathbb": {
+    "prefix": "@bb",
+    "body": "\\mathbb{$1}$0"
+  },
+  "At mathfrak": {
+    "prefix": "@frak",
+    "body": "\\mathfrak{$1}$0"
+  },
+  "At textbf": {
+    "prefix": "@tbf",
+    "body": "\\textbf{$1}$0"
+  },
+  "At textit": {
+    "prefix": "@tit",
+    "body": "\\textit{$1}$0"
+  },
+  "At texttt": {
+    "prefix": "@ttt",
+    "body": "\\texttt{$1}$0"
+  },
+  "At emph": {
+    "prefix": "@em",
+    "body": "\\emph{$1}$0"
+  },
+  "At text": {
+    "prefix": "@txt",
+    "body": "\\text{$1}$0"
+  },
+  "Subscript double underscore": {
+    "prefix": "__",
+    "body": "_{$1}$0"
+  },
+  "Superscript double star": {
+    "prefix": "**",
+    "body": "^{$1}$0"
+  },
+  "Dots triple": {
+    "prefix": "...",
+    "body": "\\dots"
+  },
+  "Fraction": {
+    "prefix": "@/",
+    "body": "\\frac{$1}{$2}$0"
+  },
+  "Square root": {
+    "prefix": "@sq",
+    "body": "\\sqrt{$1}$0"
+  },
+  "Nth root": {
+    "prefix": "@rt",
+    "body": "\\sqrt[$1]{$2}$0"
+  },
+  "Superscript": {
+    "prefix": "@^",
+    "body": "^{$1}$0"
+  },
+  "Subscript": {
+    "prefix": "@_",
+    "body": "_{$1}$0"
+  },
+  "Infinity": {
+    "prefix": "@8",
+    "body": "\\infty"
+  },
+  "Infinity alt": {
+    "prefix": "@inf",
+    "body": "\\infty"
+  },
+  "Partial": {
+    "prefix": "@6",
+    "body": "\\partial"
+  },
+  "Times": {
+    "prefix": "@*",
+    "body": "\\times"
+  },
+  "Cdot": {
+    "prefix": "@.",
+    "body": "\\cdot"
+  },
+  "Sum": {
+    "prefix": "@sum",
+    "body": "\\sum_{$1}^{$2}$0"
+  },
+  "Product": {
+    "prefix": "@prod",
+    "body": "\\prod_{$1}^{$2}$0"
+  },
+  "Integral": {
+    "prefix": "@int",
+    "body": "\\int_{$1}^{$2}$0"
+  },
+  "Double integral": {
+    "prefix": "@iint",
+    "body": "\\iint_{$1}$0"
+  },
+  "Triple integral": {
+    "prefix": "@iiint",
+    "body": "\\iiint_{$1}$0"
+  },
+  "Contour integral": {
+    "prefix": "@oint",
+    "body": "\\oint_{$1}$0"
+  },
+  "Limit": {
+    "prefix": "@lim",
+    "body": "\\lim_{$1 \\to $2}$0"
+  },
+  "Nabla": {
+    "prefix": "@nabla",
+    "body": "\\nabla"
+  },
+  "For all": {
+    "prefix": "@fa",
+    "body": "\\forall"
+  },
+  "Exists": {
+    "prefix": "@ex",
+    "body": "\\exists"
+  },
+  "In set": {
+    "prefix": "@in",
+    "body": "\\in"
+  },
+  "Not in set": {
+    "prefix": "@nin",
+    "body": "\\notin"
+  },
+  "Subset": {
+    "prefix": "@sub",
+    "body": "\\subset"
+  },
+  "Subset equal": {
+    "prefix": "@sube",
+    "body": "\\subseteq"
+  },
+  "Superset": {
+    "prefix": "@sup",
+    "body": "\\supset"
+  },
+  "Superset equal": {
+    "prefix": "@supe",
+    "body": "\\supseteq"
+  },
+  "Empty set": {
+    "prefix": "@0",
+    "body": "\\emptyset"
+  },
+  "Union": {
+    "prefix": "@cup",
+    "body": "\\cup"
+  },
+  "Intersection": {
+    "prefix": "@cap",
+    "body": "\\cap"
+  },
+  "Big cup": {
+    "prefix": "@bcup",
+    "body": "\\bigcup_{$1}^{$2}$0"
+  },
+  "Big cap": {
+    "prefix": "@bcap",
+    "body": "\\bigcap_{$1}^{$2}$0"
+  },
+  "Set minus": {
+    "prefix": "@sm",
+    "body": "\\setminus"
+  },
+  "Less than or equal": {
+    "prefix": "@<=",
+    "body": "\\leq"
+  },
+  "Greater than or equal": {
+    "prefix": "@>=",
+    "body": "\\geq"
+  },
+  "Not equal": {
+    "prefix": "@!=",
+    "body": "\\neq"
+  },
+  "Approximately": {
+    "prefix": "@~",
+    "body": "\\approx"
+  },
+  "Equivalent": {
+    "prefix": "@==",
+    "body": "\\equiv"
+  },
+  "Similar": {
+    "prefix": "@sim",
+    "body": "\\sim"
+  },
+  "Congruent": {
+    "prefix": "@cong",
+    "body": "\\cong"
+  },
+  "Proportional": {
+    "prefix": "@prop",
+    "body": "\\propto"
+  },
+  "Much less": {
+    "prefix": "@<<",
+    "body": "\\ll"
+  },
+  "Much greater": {
+    "prefix": "@>>",
+    "body": "\\gg"
+  },
+  "Right arrow": {
+    "prefix": "@->",
+    "body": "\\rightarrow"
+  },
+  "Left arrow": {
+    "prefix": "@<-",
+    "body": "\\leftarrow"
+  },
+  "Left right arrow": {
+    "prefix": "@<>",
+    "body": "\\leftrightarrow"
+  },
+  "Right double arrow": {
+    "prefix": "@=>",
+    "body": "\\Rightarrow"
+  },
+  "Left double arrow": {
+    "prefix": "@=<",
+    "body": "\\Leftarrow"
+  },
+  "Left right double arrow": {
+    "prefix": "@<=>",
+    "body": "\\Leftrightarrow"
+  },
+  "Long right arrow": {
+    "prefix": "@-->",
+    "body": "\\longrightarrow"
+  },
+  "Long left arrow": {
+    "prefix": "@<--",
+    "body": "\\longleftarrow"
+  },
+  "Maps to": {
+    "prefix": "@|>",
+    "body": "\\mapsto"
+  },
+  "Wedge": {
+    "prefix": "@and",
+    "body": "\\wedge"
+  },
+  "Vee": {
+    "prefix": "@or",
+    "body": "\\vee"
+  },
+  "Negation": {
+    "prefix": "@neg",
+    "body": "\\neg"
+  },
+  "Plus minus": {
+    "prefix": "@+-",
+    "body": "\\pm"
+  },
+  "Minus plus": {
+    "prefix": "@-+",
+    "body": "\\mp"
+  },
+  "Direct sum": {
+    "prefix": "@o+",
+    "body": "\\oplus"
+  },
+  "Tensor product": {
+    "prefix": "@ox",
+    "body": "\\otimes"
+  },
+  "Circ": {
+    "prefix": "@o",
+    "body": "\\circ"
+  },
+  "Bullet": {
+    "prefix": "@blt",
+    "body": "\\bullet"
+  },
+  "Star": {
+    "prefix": "@star",
+    "body": "\\star"
+  },
+  "Dagger": {
+    "prefix": "@dag",
+    "body": "\\dagger"
+  },
+  "Double dagger": {
+    "prefix": "@ddag",
+    "body": "\\ddagger"
+  },
+  "Perp": {
+    "prefix": "@perp",
+    "body": "\\perp"
+  },
+  "Parallel": {
+    "prefix": "@para",
+    "body": "\\parallel"
+  },
+  "Left right parentheses": {
+    "prefix": "@(",
+    "body": "\\left( $1 \\right)$0"
+  },
+  "Left right brackets": {
+    "prefix": "@[",
+    "body": "\\left[ $1 \\right]$0"
+  },
+  "Left right braces": {
+    "prefix": "@{",
+    "body": "\\left\\{ $1 \\right\\}$0"
+  },
+  "Left right angle": {
+    "prefix": "@<",
+    "body": "\\left\\langle $1 \\right\\rangle$0"
+  },
+  "Left right pipe": {
+    "prefix": "@|",
+    "body": "\\left| $1 \\right|$0"
+  },
+  "Left right double pipe": {
+    "prefix": "@||",
+    "body": "\\left\\| $1 \\right\\|$0"
+  },
+  "Hat": {
+    "prefix": "@hat",
+    "body": "\\hat{$1}$0"
+  },
+  "Wide hat": {
+    "prefix": "@what",
+    "body": "\\widehat{$1}$0"
+  },
+  "Bar": {
+    "prefix": "@bar",
+    "body": "\\bar{$1}$0"
+  },
+  "Overline": {
+    "prefix": "@ol",
+    "body": "\\overline{$1}$0"
+  },
+  "Underline": {
+    "prefix": "@ul",
+    "body": "\\underline{$1}$0"
+  },
+  "Tilde": {
+    "prefix": "@tld",
+    "body": "\\tilde{$1}$0"
+  },
+  "Wide tilde": {
+    "prefix": "@wtld",
+    "body": "\\widetilde{$1}$0"
+  },
+  "Dot": {
+    "prefix": "@dot",
+    "body": "\\dot{$1}$0"
+  },
+  "Double dot": {
+    "prefix": "@ddot",
+    "body": "\\ddot{$1}$0"
+  },
+  "Vector": {
+    "prefix": "@vec",
+    "body": "\\vec{$1}$0"
+  },
+  "Overbrace": {
+    "prefix": "@obr",
+    "body": "\\overbrace{$1}^{$2}$0"
+  },
+  "Underbrace": {
+    "prefix": "@ubr",
+    "body": "\\underbrace{$1}_{$2}$0"
+  },
+  "Overset": {
+    "prefix": "@ovs",
+    "body": "\\overset{$1}{$2}$0"
+  },
+  "Underset": {
+    "prefix": "@uns",
+    "body": "\\underset{$1}{$2}$0"
+  },
+  "Stackrel": {
+    "prefix": "@stk",
+    "body": "\\stackrel{$1}{$2}$0"
+  },
+  "Ldots": {
+    "prefix": "@...",
+    "body": "\\ldots"
+  },
+  "Cdots": {
+    "prefix": "@c...",
+    "body": "\\cdots"
+  },
+  "Vdots": {
+    "prefix": "@v...",
+    "body": "\\vdots"
+  },
+  "Ddots": {
+    "prefix": "@d...",
+    "body": "\\ddots"
+  },
+  "Sine": {
+    "prefix": "@sin",
+    "body": "\\sin"
+  },
+  "Cosine": {
+    "prefix": "@cos",
+    "body": "\\cos"
+  },
+  "Tangent": {
+    "prefix": "@tan",
+    "body": "\\tan"
+  },
+  "Cotangent": {
+    "prefix": "@cot",
+    "body": "\\cot"
+  },
+  "Secant": {
+    "prefix": "@sec",
+    "body": "\\sec"
+  },
+  "Cosecant": {
+    "prefix": "@csc",
+    "body": "\\csc"
+  },
+  "Arcsine": {
+    "prefix": "@asin",
+    "body": "\\arcsin"
+  },
+  "Arccosine": {
+    "prefix": "@acos",
+    "body": "\\arccos"
+  },
+  "Arctangent": {
+    "prefix": "@atan",
+    "body": "\\arctan"
+  },
+  "Logarithm": {
+    "prefix": "@log",
+    "body": "\\log"
+  },
+  "Natural logarithm": {
+    "prefix": "@ln",
+    "body": "\\ln"
+  },
+  "Exponential": {
+    "prefix": "@exp",
+    "body": "\\exp"
+  },
+  "Max": {
+    "prefix": "@max",
+    "body": "\\max"
+  },
+  "Min": {
+    "prefix": "@min",
+    "body": "\\min"
+  },
+  "Sup": {
+    "prefix": "@supr",
+    "body": "\\sup"
+  },
+  "Inf": {
+    "prefix": "@infm",
+    "body": "\\inf"
+  },
+  "Arg": {
+    "prefix": "@arg",
+    "body": "\\arg"
+  },
+  "Degree": {
+    "prefix": "@deg",
+    "body": "\\deg"
+  },
+  "Determinant": {
+    "prefix": "@det",
+    "body": "\\det"
+  },
+  "Dimension": {
+    "prefix": "@dim",
+    "body": "\\dim"
+  },
+  "Ker": {
+    "prefix": "@ker",
+    "body": "\\ker"
+  },
+  "Hom": {
+    "prefix": "@hom",
+    "body": "\\hom"
+  },
+  "Real numbers": {
+    "prefix": "@R",
+    "body": "\\mathbb{R}"
+  },
+  "Complex numbers": {
+    "prefix": "@C",
+    "body": "\\mathbb{C}"
+  },
+  "Natural numbers": {
+    "prefix": "@N",
+    "body": "\\mathbb{N}"
+  },
+  "Integers": {
+    "prefix": "@Z",
+    "body": "\\mathbb{Z}"
+  },
+  "Rationals": {
+    "prefix": "@RQ",
+    "body": "\\mathbb{Q}"
+  },
+  "Re": {
+    "prefix": "@Re",
+    "body": "\\Re"
+  },
+  "Im": {
+    "prefix": "@Im",
+    "body": "\\Im"
+  },
+  "Aleph": {
+    "prefix": "@aleph",
+    "body": "\\aleph"
+  },
+  "ell": {
+    "prefix": "@ell",
+    "body": "\\ell"
+  },
+  "hbar": {
+    "prefix": "@hbar",
+    "body": "\\hbar"
+  },
+  "wp": {
+    "prefix": "@wp",
+    "body": "\\wp"
+  },
+  "Prime": {
+    "prefix": "@'",
+    "body": "^{\\prime}"
+  },
+  "Binom": {
+    "prefix": "@binom",
+    "body": "\\binom{$1}{$2}$0"
+  },
+  "Choose": {
+    "prefix": "@choose",
+    "body": "{$1 \\choose $2}$0"
+  },
+  "Big O": {
+    "prefix": "@O",
+    "body": "\\mathcal{O}($1)$0"
+  },
+  "Thin space": {
+    "prefix": "@,",
+    "body": "\\,"
+  },
+  "Medium space": {
+    "prefix": "@:",
+    "body": "\\:"
+  },
+  "Thick space": {
+    "prefix": "@;",
+    "body": "\\;"
+  },
+  "Negative space": {
+    "prefix": "@!",
+    "body": "\\!"
+  },
+  "Quad space": {
+    "prefix": "@qd",
+    "body": "\\quad"
+  },
+  "QQuad space": {
+    "prefix": "@qqd",
+    "body": "\\qquad"
+  },
+  "Checkmark": {
+    "prefix": "@chk",
+    "body": "\\checkmark"
+  },
+  "Boxed": {
+    "prefix": "@box",
+    "body": "\\boxed{$1}$0"
+  },
+  "Cancel": {
+    "prefix": "@can",
+    "body": "\\cancel{$1}$0"
+  },
+  "Phantom": {
+    "prefix": "@ph",
+    "body": "\\phantom{$1}$0"
+  },
+  "Frame box": {
+    "prefix": "@fbox",
+    "body": "\\fbox{$1}$0"
+  },
+  "Color box": {
+    "prefix": "@cbox",
+    "body": "\\colorbox{$1}{$2}$0"
+  },
+  "Environment equation": {
+    "prefix": "BEQ",
+    "body": "\\begin{equation}\n\t$1\n\\end{equation}$0"
+  },
+  "Environment equation star": {
+    "prefix": "BSEQ",
+    "body": "\\begin{equation*}\n\t$1\n\\end{equation*}$0"
+  },
+  "Environment align": {
+    "prefix": "BAL",
+    "body": "\\begin{align}\n\t$1\n\\end{align}$0"
+  },
+  "Environment align star": {
+    "prefix": "BSAL",
+    "body": "\\begin{align*}\n\t$1\n\\end{align*}$0"
+  },
+  "Environment gather": {
+    "prefix": "BGA",
+    "body": "\\begin{gather}\n\t$1\n\\end{gather}$0"
+  },
+  "Environment gather star": {
+    "prefix": "BSGA",
+    "body": "\\begin{gather*}\n\t$1\n\\end{gather*}$0"
+  },
+  "Environment multline": {
+    "prefix": "BMU",
+    "body": "\\begin{multline}\n\t$1\n\\end{multline}$0"
+  },
+  "Environment multline star": {
+    "prefix": "BSMU",
+    "body": "\\begin{multline*}\n\t$1\n\\end{multline*}$0"
+  },
+  "Environment split": {
+    "prefix": "BSPL",
+    "body": "\\begin{split}\n\t$1\n\\end{split}$0"
+  },
+  "Environment cases": {
+    "prefix": "BCAS",
+    "body": "\\begin{cases}\n\t$1 & $2 \\\\\\\\\n\t$3 & $4\n\\end{cases}$0"
+  },
+  "Environment matrix": {
+    "prefix": "BMAT",
+    "body": "\\begin{matrix}\n\t$1\n\\end{matrix}$0"
+  },
+  "Environment pmatrix": {
+    "prefix": "BPMAT",
+    "body": "\\begin{pmatrix}\n\t$1\n\\end{pmatrix}$0"
+  },
+  "Environment bmatrix": {
+    "prefix": "BBMAT",
+    "body": "\\begin{bmatrix}\n\t$1\n\\end{bmatrix}$0"
+  },
+  "Environment vmatrix": {
+    "prefix": "BVMAT",
+    "body": "\\begin{vmatrix}\n\t$1\n\\end{vmatrix}$0"
+  },
+  "Environment Vmatrix": {
+    "prefix": "BVVMAT",
+    "body": "\\begin{Vmatrix}\n\t$1\n\\end{Vmatrix}$0"
+  },
+  "Environment Bmatrix": {
+    "prefix": "BBMAT2",
+    "body": "\\begin{Bmatrix}\n\t$1\n\\end{Bmatrix}$0"
+  },
+  "Environment smallmatrix": {
+    "prefix": "BSMAT",
+    "body": "\\begin{smallmatrix}\n\t$1\n\\end{smallmatrix}$0"
+  },
+  "Environment itemize": {
+    "prefix": "BIT",
+    "body": "\\begin{itemize}\n\t\\item $1\n\\end{itemize}$0"
+  },
+  "Environment enumerate": {
+    "prefix": "BEN",
+    "body": "\\begin{enumerate}\n\t\\item $1\n\\end{enumerate}$0"
+  },
+  "Environment description": {
+    "prefix": "BDES",
+    "body": "\\begin{description}\n\t\\item[$1] $2\n\\end{description}$0"
+  },
+  "Environment figure": {
+    "prefix": "BFI",
+    "body": "\\begin{figure}[${1:htbp}]\n\t\\centering\n\t\\includegraphics[width=${2:0.8}\\textwidth]{$3}\n\t\\caption{$4}\n\t\\label{fig:$5}\n\\end{figure}$0"
+  },
+  "Environment figure alt": {
+    "prefix": "BFIG",
+    "body": "\\begin{figure}[${1:htbp}]\n\t\\centering\n\t\\includegraphics[width=${2:0.8}\\textwidth]{$3}\n\t\\caption{$4}\n\t\\label{fig:$5}\n\\end{figure}$0"
+  },
+  "Environment table": {
+    "prefix": "BTA",
+    "body": "\\begin{table}[${1:htbp}]\n\t\\centering\n\t\\caption{$2}\n\t\\label{tab:$3}\n\t\\begin{tabular}{$4}\n\t\t\\hline\n\t\t$5 \\\\\\\\\n\t\t\\hline\n\t\\end{tabular}\n\\end{table}$0"
+  },
+  "Environment table alt": {
+    "prefix": "BTAB",
+    "body": "\\begin{table}[${1:htbp}]\n\t\\centering\n\t\\caption{$2}\n\t\\label{tab:$3}\n\t\\begin{tabular}{$4}\n\t\t\\hline\n\t\t$5 \\\\\\\\\n\t\t\\hline\n\t\\end{tabular}\n\\end{table}$0"
+  },
+  "Environment tabular": {
+    "prefix": "BTBR",
+    "body": "\\begin{tabular}{$1}\n\t\\hline\n\t$2 \\\\\\\\\n\t\\hline\n\\end{tabular}$0"
+  },
+  "Environment center": {
+    "prefix": "BCEN",
+    "body": "\\begin{center}\n\t$1\n\\end{center}$0"
+  },
+  "Environment quote": {
+    "prefix": "BQUO",
+    "body": "\\begin{quote}\n\t$1\n\\end{quote}$0"
+  },
+  "Environment verbatim": {
+    "prefix": "BVRB",
+    "body": "\\begin{verbatim}\n$1\n\\end{verbatim}$0"
+  },
+  "Environment abstract": {
+    "prefix": "BABS",
+    "body": "\\begin{abstract}\n\t$1\n\\end{abstract}$0"
+  },
+  "Environment minipage": {
+    "prefix": "BMIN",
+    "body": "\\begin{minipage}{${1:\\textwidth}}\n\t$2\n\\end{minipage}$0"
+  },
+  "Environment theorem": {
+    "prefix": "BTHM",
+    "body": "\\begin{theorem}\n\t$1\n\\end{theorem}$0"
+  },
+  "Environment lemma": {
+    "prefix": "BLEM",
+    "body": "\\begin{lemma}\n\t$1\n\\end{lemma}$0"
+  },
+  "Environment corollary": {
+    "prefix": "BCOR",
+    "body": "\\begin{corollary}\n\t$1\n\\end{corollary}$0"
+  },
+  "Environment proposition": {
+    "prefix": "BPRP",
+    "body": "\\begin{proposition}\n\t$1\n\\end{proposition}$0"
+  },
+  "Environment definition": {
+    "prefix": "BDEF",
+    "body": "\\begin{definition}\n\t$1\n\\end{definition}$0"
+  },
+  "Environment example": {
+    "prefix": "BEXM",
+    "body": "\\begin{example}\n\t$1\n\\end{example}$0"
+  },
+  "Environment remark": {
+    "prefix": "BRMK",
+    "body": "\\begin{remark}\n\t$1\n\\end{remark}$0"
+  },
+  "Environment proof": {
+    "prefix": "BPRF",
+    "body": "\\begin{proof}\n\t$1\n\\end{proof}$0"
+  },
+  "Environment frame beamer": {
+    "prefix": "BFR",
+    "body": "\\begin{frame}{$1}\n\t$2\n\\end{frame}$0"
+  },
+  "Environment frame beamer alt": {
+    "prefix": "BFRM",
+    "body": "\\begin{frame}{$1}\n\t$2\n\\end{frame}$0"
+  },
+  "Environment block beamer": {
+    "prefix": "BBLK",
+    "body": "\\begin{block}{$1}\n\t$2\n\\end{block}$0"
+  },
+  "Environment alertblock beamer": {
+    "prefix": "BABLK",
+    "body": "\\begin{alertblock}{$1}\n\t$2\n\\end{alertblock}$0"
+  },
+  "Environment exampleblock beamer": {
+    "prefix": "BEBLK",
+    "body": "\\begin{exampleblock}{$1}\n\t$2\n\\end{exampleblock}$0"
+  },
+  "Environment columns beamer": {
+    "prefix": "BCOL",
+    "body": "\\begin{columns}\n\t\\begin{column}{${1:0.5}\\textwidth}\n\t\t$2\n\t\\end{column}\n\t\\begin{column}{${3:0.5}\\textwidth}\n\t\t$4\n\t\\end{column}\n\\end{columns}$0"
+  },
+  "Environment tikzpicture": {
+    "prefix": "BTIK",
+    "body": "\\begin{tikzpicture}\n\t$1\n\\end{tikzpicture}$0"
+  },
+  "Environment lstlisting": {
+    "prefix": "BLST",
+    "body": "\\begin{lstlisting}[${1:language=$2}]\n$3\n\\end{lstlisting}$0"
+  },
+  "Environment minted": {
+    "prefix": "BMINT",
+    "body": "\\begin{minted}{$1}\n$2\n\\end{minted}$0"
+  },
+  "Environment algorithm": {
+    "prefix": "BALG",
+    "body": "\\begin{algorithm}\n\t\\caption{$1}\n\t\\label{alg:$2}\n\t\\begin{algorithmic}[1]\n\t\t$3\n\t\\end{algorithmic}\n\\end{algorithm}$0"
+  },
+  "Generic environment": {
+    "prefix": "BEG",
+    "body": "\\begin{$1}\n\t$2\n\\end{$1}$0"
+  },
+  "Section part": {
+    "prefix": "SPA",
+    "body": "\\part{$1}\n$0"
+  },
+  "Section chapter": {
+    "prefix": "SCH",
+    "body": "\\chapter{$1}\n$0"
+  },
+  "Section section": {
+    "prefix": "SSE",
+    "body": "\\section{$1}\n$0"
+  },
+  "Section subsection": {
+    "prefix": "SSS",
+    "body": "\\subsection{$1}\n$0"
+  },
+  "Section subsubsection": {
+    "prefix": "SS2",
+    "body": "\\subsubsection{$1}\n$0"
+  },
+  "Section paragraph": {
+    "prefix": "SPG",
+    "body": "\\paragraph{$1}\n$0"
+  },
+  "Section subparagraph": {
+    "prefix": "SSP",
+    "body": "\\subparagraph{$1}\n$0"
+  },
+  "Section alt": {
+    "prefix": "SEC",
+    "body": "\\section{$1}\n$0"
+  },
+  "Section star": {
+    "prefix": "SECS",
+    "body": "\\section*{$1}\n$0"
+  },
+  "Subsection alt": {
+    "prefix": "SSEC",
+    "body": "\\subsection{$1}\n$0"
+  },
+  "Subsection star": {
+    "prefix": "SSECS",
+    "body": "\\subsection*{$1}\n$0"
+  },
+  "Subsubsection alt": {
+    "prefix": "SSSEC",
+    "body": "\\subsubsection{$1}\n$0"
+  },
+  "Subsubsection star": {
+    "prefix": "SSSECS",
+    "body": "\\subsubsection*{$1}\n$0"
+  },
+  "Paragraph alt": {
+    "prefix": "PAR",
+    "body": "\\paragraph{$1}\n$0"
+  },
+  "Chapter alt": {
+    "prefix": "CHA",
+    "body": "\\chapter{$1}\n$0"
+  },
+  "Chapter star": {
+    "prefix": "CHAS",
+    "body": "\\chapter*{$1}\n$0"
+  },
+  "Inline math": {
+    "prefix": "MK",
+    "body": "$$1$$0"
+  },
+  "Display math": {
+    "prefix": "DM",
+    "body": "\\[\n\t$1\n\\]$0"
+  },
+  "Label": {
+    "prefix": "LAB",
+    "body": "\\label{$1}$0"
+  },
+  "Reference": {
+    "prefix": "REF",
+    "body": "\\ref{$1}$0"
+  },
+  "Equation reference": {
+    "prefix": "EQREF",
+    "body": "\\eqref{$1}$0"
+  },
+  "Page reference": {
+    "prefix": "PREF",
+    "body": "\\pageref{$1}$0"
+  },
+  "Autoref": {
+    "prefix": "AREF",
+    "body": "\\autoref{$1}$0"
+  },
+  "Cref": {
+    "prefix": "CREF",
+    "body": "\\cref{$1}$0"
+  },
+  "Cref capital": {
+    "prefix": "CREFS",
+    "body": "\\Cref{$1}$0"
+  },
+  "Citation": {
+    "prefix": "CITE",
+    "body": "\\cite{$1}$0"
+  },
+  "Citation with page": {
+    "prefix": "CITEP",
+    "body": "\\cite[$1]{$2}$0"
+  },
+  "Citep natbib": {
+    "prefix": "CITP",
+    "body": "\\citep{$1}$0"
+  },
+  "Citet natbib": {
+    "prefix": "CITT",
+    "body": "\\citet{$1}$0"
+  },
+  "Footnote": {
+    "prefix": "FN",
+    "body": "\\footnote{$1}$0"
+  },
+  "Footnotemark": {
+    "prefix": "FNM",
+    "body": "\\footnotemark"
+  },
+  "Footnotetext": {
+    "prefix": "FNT",
+    "body": "\\footnotetext{$1}$0"
+  },
+  "Item": {
+    "prefix": "II",
+    "body": "\\item $0"
+  },
+  "Item with label": {
+    "prefix": "IIL",
+    "body": "\\item[$1] $0"
+  },
+  "Includegraphics": {
+    "prefix": "IMG",
+    "body": "\\includegraphics[width=${1:0.8}\\textwidth]{$2}$0"
+  },
+  "Use package": {
+    "prefix": "PKG",
+    "body": "\\usepackage{$1}$0"
+  },
+  "Use package with options": {
+    "prefix": "PKGO",
+    "body": "\\usepackage[$1]{$2}$0"
+  },
+  "New command": {
+    "prefix": "NCMD",
+    "body": "\\newcommand{\\$1}[$2]{$3}$0"
+  },
+  "New command no args": {
+    "prefix": "NCMD0",
+    "body": "\\newcommand{\\$1}{$2}$0"
+  },
+  "Renew command": {
+    "prefix": "RCMD",
+    "body": "\\renewcommand{\\$1}[$2]{$3}$0"
+  },
+  "Declare math operator": {
+    "prefix": "DMOP",
+    "body": "\\DeclareMathOperator{\\$1}{$2}$0"
+  },
+  "New environment": {
+    "prefix": "NENV",
+    "body": "\\newenvironment{$1}\n\t{$2}\n\t{$3}$0"
+  },
+  "New theorem": {
+    "prefix": "NTHM",
+    "body": "\\newtheorem{$1}{$2}$0"
+  },
+  "Document class article": {
+    "prefix": "DCART",
+    "body": "\\documentclass[${1:12pt}]{article}\n\n\\usepackage[utf8]{inputenc}\n\\usepackage{amsmath,amssymb}\n\n\\title{$2}\n\\author{$3}\n\\date{${4:\\today}}\n\n\\begin{document}\n\n\\maketitle\n\n$0\n\n\\end{document}"
+  },
+  "Document class report": {
+    "prefix": "DCREP",
+    "body": "\\documentclass[${1:12pt}]{report}\n\n\\usepackage[utf8]{inputenc}\n\\usepackage{amsmath,amssymb}\n\n\\title{$2}\n\\author{$3}\n\\date{${4:\\today}}\n\n\\begin{document}\n\n\\maketitle\n\\tableofcontents\n\n$0\n\n\\end{document}"
+  },
+  "Document class book": {
+    "prefix": "DCBOOK",
+    "body": "\\documentclass[${1:12pt}]{book}\n\n\\usepackage[utf8]{inputenc}\n\\usepackage{amsmath,amssymb}\n\n\\title{$2}\n\\author{$3}\n\\date{${4:\\today}}\n\n\\begin{document}\n\n\\frontmatter\n\\maketitle\n\\tableofcontents\n\n\\mainmatter\n$0\n\n\\backmatter\n\n\\end{document}"
+  },
+  "Document class beamer": {
+    "prefix": "DCBMR",
+    "body": "\\documentclass{beamer}\n\n\\usetheme{${1:default}}\n\\title{$2}\n\\author{$3}\n\\date{${4:\\today}}\n\n\\begin{document}\n\n\\begin{frame}\n\t\\titlepage\n\\end{frame}\n\n$0\n\n\\end{document}"
+  },
+  "Document class letter": {
+    "prefix": "DCLET",
+    "body": "\\documentclass{letter}\n\n\\signature{$1}\n\\address{$2}\n\n\\begin{document}\n\n\\begin{letter}{$3}\n\n\\opening{$4}\n\n$0\n\n\\closing{${5:Sincerely,}}\n\n\\end{letter}\n\n\\end{document}"
+  },
+  "Table of contents": {
+    "prefix": "TOC",
+    "body": "\\tableofcontents"
+  },
+  "List of figures": {
+    "prefix": "LOF",
+    "body": "\\listoffigures"
+  },
+  "List of tables": {
+    "prefix": "LOT",
+    "body": "\\listoftables"
+  },
+  "Make title": {
+    "prefix": "MKTIT",
+    "body": "\\maketitle"
+  },
+  "Bibliography": {
+    "prefix": "BIB",
+    "body": "\\bibliography{$1}\n\\bibliographystyle{${2:plain}}$0"
+  },
+  "Biblatex": {
+    "prefix": "BIBL",
+    "body": "\\printbibliography$0"
+  },
+  "Addbibresource": {
+    "prefix": "ABIB",
+    "body": "\\addbibresource{$1}$0"
+  },
+  "URL": {
+    "prefix": "URL",
+    "body": "\\url{$1}$0"
+  },
+  "Href link": {
+    "prefix": "HREF",
+    "body": "\\href{$1}{$2}$0"
+  },
+  "Text color": {
+    "prefix": "TCOL",
+    "body": "\\textcolor{$1}{$2}$0"
+  },
+  "Define color": {
+    "prefix": "DCOL",
+    "body": "\\definecolor{$1}{${2:RGB}}{$3}$0"
+  },
+  "Horizontal space": {
+    "prefix": "HSP",
+    "body": "\\hspace{$1}$0"
+  },
+  "Vertical space": {
+    "prefix": "VSP",
+    "body": "\\vspace{$1}$0"
+  },
+  "Horizontal fill": {
+    "prefix": "HF",
+    "body": "\\hfill"
+  },
+  "Vertical fill": {
+    "prefix": "VF",
+    "body": "\\vfill"
+  },
+  "New line": {
+    "prefix": "NL",
+    "body": "\\\\\\\\"
+  },
+  "New page": {
+    "prefix": "NP",
+    "body": "\\newpage"
+  },
+  "Clear page": {
+    "prefix": "CP",
+    "body": "\\clearpage"
+  },
+  "Input file": {
+    "prefix": "INP",
+    "body": "\\input{$1}$0"
+  },
+  "Include file": {
+    "prefix": "INC",
+    "body": "\\include{$1}$0"
+  },
+  "Subfile": {
+    "prefix": "SUBF",
+    "body": "\\subfile{$1}$0"
+  },
+  "Import": {
+    "prefix": "IMP",
+    "body": "\\import{$1}{$2}$0"
+  },
+  "Left": {
+    "prefix": "LR(",
+    "body": "\\left( $1 \\right)$0"
+  },
+  "Left bracket": {
+    "prefix": "LR[",
+    "body": "\\left[ $1 \\right]$0"
+  },
+  "Left brace": {
+    "prefix": "LR{",
+    "body": "\\left\\{ $1 \\right\\}$0"
+  },
+  "Left angle": {
+    "prefix": "LR<",
+    "body": "\\left\\langle $1 \\right\\rangle$0"
+  },
+  "Left pipe": {
+    "prefix": "LR|",
+    "body": "\\left| $1 \\right|$0"
+  },
+  "Left double pipe": {
+    "prefix": "LRN",
+    "body": "\\left\\| $1 \\right\\|$0"
+  },
+  "Bigl parenthesis": {
+    "prefix": "BIGL(",
+    "body": "\\bigl( $1 \\bigr)$0"
+  },
+  "Biggl parenthesis": {
+    "prefix": "BIGGL(",
+    "body": "\\biggl( $1 \\biggr)$0"
+  },
+  "If statement": {
+    "prefix": "IF",
+    "body": "\\if$1\n\t$2\n\\fi$0"
+  },
+  "If then else": {
+    "prefix": "IFEL",
+    "body": "\\ifthenelse{$1}{$2}{$3}$0"
+  },
+  "For loop": {
+    "prefix": "FOR",
+    "body": "\\foreach \\$1 in {$2} {\n\t$3\n}$0"
+  },
+  "While loop": {
+    "prefix": "WHILE",
+    "body": "\\whiledo{$1}{\n\t$2\n}$0"
+  },
+  "alignat": {
+    "prefix": "alignat",
+    "body": "\\begin{alignat}{1}\n\t$0\n\\end{alignat}"
+  },
+  "begin": {
+    "prefix": "begin",
+    "body": "\\begin{${1:environment}}\n\t$0\n\\end{${1:environment}}"
+  },
+  "exampleblock": {
+    "prefix": "exampleblock",
+    "body": "\\begin{exampleblock}\n\t$0\n\\end{exampleblock}"
+  },
+  "alertblock": {
+    "prefix": "alertblock",
+    "body": "\\begin{alertblock}\n\t$0\n\\end{alertblock}"
+  },
+  "block": {
+    "prefix": "block",
+    "body": "\\begin{block}\n\t$0\n\\end{block}"
+  },
+  "corollary": {
+    "prefix": "corollary",
+    "body": "\\begin{corollary}[$1]\n\t$0\n\\end{corollary}"
+  },
+  "definition": {
+    "prefix": "definition",
+    "body": "\\begin{definition}[$1]\n\t$0\n\\end{definition}"
+  },
+  "description": {
+    "prefix": "description",
+    "body": "\\begin{description}\n\t\\item[$1] $0\n\\end{description}"
+  },
+  "enumerate": {
+    "prefix": "enumerate",
+    "body": "\\begin{enumerate}\n\t\\item $0\n\\end{enumerate}"
+  },
+  "figure": {
+    "prefix": "figure",
+    "body": "\\begin{figure}[htp]\n\t\\centering\n\t\\includegraphics[width=0.99\\textwidth]{$1}\n\t\\caption{$0}\n\t\\label{fig:$1}\n\\end{figure}"
+  },
+  "inkscape": {
+    "prefix": "inkscape",
+    "body": "\\begin{figure}[H]\n\t\\centering\n\t\\def\\svgwidth{0.49\\columnwidth}\n\t\\import{./ink/}{$1.pdf_tex}\n\t\\caption{$0}\n\t\\label{fig:$1}\n\\end{figure}"
+  },
+  "equation": {
+    "prefix": "equation",
+    "body": "\\begin{equation}\n\t$1\n\t\\label{eqn:$0}\n\\end{equation}"
+  },
+  "ttt": {
+    "prefix": "ttt",
+    "body": "\\textcolor{blue}{\\texttt{$0}}"
+  },
+  "itemize": {
+    "prefix": "itemize",
+    "body": "\\begin{itemize}\n\t\\item $0\n\\end{itemize}"
+  },
+  "lemma": {
+    "prefix": "lemma",
+    "body": "\\begin{lemma}[$1]\n\t$0\n\\end{lemma}"
+  },
+  "pmatrix": {
+    "prefix": "pmatrix",
+    "body": "\\begin{pmatrix}\n\t$1 & $2 \\\\\\\n\t$3 & $0 \\\\\\\n\\end{pmatrix}"
+  },
+  "proof": {
+    "prefix": "proof",
+    "body": "\\begin{proof}\n\t$0\n\\end{proof}"
+  },
+  "proposition": {
+    "prefix": "proposition",
+    "body": "\\begin{proposition}[$1]\n\t$0\n\\end{proposition}"
+  },
+  "subalignat": {
+    "prefix": "subalignat",
+    "body": "\\begin{subequations}\n\t\\begin{alignat}{1}\n\t\t$0\n\t\\end{alignat}\n\\end{subequations}"
+  },
+  "subfigure": {
+    "prefix": "subfigure",
+    "body": "\\centering\n\t\\begin{subfigure}[b]{0.4\\textwidth}\n\t\\includegraphics[width=\\textwidth]{$1}\n\t\\caption{$0}\n\t\\label{fig:$1}\n\\end{subfigure}"
+  },
+  "autoref": {
+    "prefix": "autoref",
+    "body": "\\autoref{$1}"
+  },
+  "twosubfigure": {
+    "prefix": "twosubfigure",
+    "body": "\\begin{figure}[htb]\n\t\\centering\n\t\\begin{subfigure}[htb]{0.49\\textwidth}\n\t\t\\includegraphics[width=\\textwidth]{$1}\n\t\t\\caption{$2}\n\t\t\\label{fig:$1}\n\t\\end{subfigure}\n\t\\begin{subfigure}[htb]{0.49\\textwidth}\n\t\t\\includegraphics[width=\\textwidth]{$3}\n\t\t\\caption{$4}\n\t\t\\label{fig:$3}\n\t\\end{subfigure}\n\t\\caption{$0}\n\t\\label{fig:$1-$3}\n\\end{figure}"
+  },
+  "foursubfigure": {
+    "prefix": "foursubfigure",
+    "body": "\\begin{figure}[htb]\n\t\\centering\n\t\\begin{subfigure}[htb]{0.49\\textwidth}\n\t\t\\includegraphics[width=\\textwidth]{$1}\n\t\t\\caption{$2}\n\t\t\\label{fig:$1}\n\t\\end{subfigure}\n\\hfill\n\t\\begin{subfigure}[htb]{0.49\\textwidth}\n\t\t\\includegraphics[width=\\textwidth]{$3}\n\t\t\\caption{$4}\n\t\t\\label{fig:$3}\n\t\\end{subfigure}\n\\hfill\n\t\\begin{subfigure}[htb]{0.49\\textwidth}\n\t\t\\includegraphics[width=\\textwidth]{$5}\n\t\t\\caption{$6}\n\t\t\\label{fig:$5}\n\t\\end{subfigure}\n\\hfill\n\t\\begin{subfigure}[htb]{0.49\\textwidth}\n\t\t\\includegraphics[width=\\textwidth]{$7}\n\t\t\\caption{$8}\n\t\t\\label{fig:$7}\n\t\\end{subfigure}\n\t\\caption{$0}\n\t\\label{fig:$0}\n\\end{figure}"
+  },
+  "table": {
+    "prefix": "table",
+    "body": "\\begin{table}[h]\n\t\\caption{$1}\n\t\\begin{tabular}{ c c }\n\t\t\\toprule\n\t\t$2 & $3 \\\\\\\n\t\t\\midrule\n\t\t$4 & $5 \\\\\\\n\t\t$6 & $7 \\\\\\\n\t\t\\bottomrule\n\t\\end{tabular}\n\\end{table}"
+  },
+  "tabular": {
+    "prefix": "tabular",
+    "body": "\\begin{tabular}{ c c }\n\t\\toprule\n\t$1 & $2 \\\\\\\n\t\\midrule\n\t$3 & $4 \\\\\\\n\t$5 & $6 \\\\\\\n\t\\bottomrule\n\\end{tabular}"
+  },
+  "theorem": {
+    "prefix": "theorem",
+    "body": "\\begin{theorem}[$1]\n\t$0\n\\end{theorem}"
+  }
+}

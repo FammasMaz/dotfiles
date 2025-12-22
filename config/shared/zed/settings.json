@@ -1,0 +1,135 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run the `open default settings` command
+// from the command palette or from `Zed` application menu.
+{
+  "auto_update": true,
+  "buffer_font_family": "CaskaydiaCove Nerd Font Mono",
+  "terminal": {
+    "font_weight": 400.0,
+    "font_size": 13.0,
+    "font_family": "CaskaydiaCove Nerd Font Mono",
+  },
+  "agent_servers": {
+    "OpenCode": {
+      "type": "custom",
+      "command": "bunx",
+      "args": ["-y", "opencode-ai@latest", "acp"],
+    },
+    "Cursor Agent": {
+      "type": "custom",
+      "command": "npx",
+      "args": ["-y", "cursor-agent-acp"],
+      "env": {},
+    },
+  },
+  "agent": {
+    "always_allow_tool_actions": true,
+    "default_profile": "write",
+    "default_model": {
+      "provider": "Symbiote",
+      "model": "antigravity/claude-opus-4-5",
+    },
+    "inline_assistant_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4.1",
+    },
+  },
+  "features": {
+    "edit_prediction_provider": "copilot",
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
+  "base_keymap": "VSCode",
+
+  "tab_bar": {
+    "show": true,
+  },
+  "theme": {
+    "mode": "system",
+    "light": "Catppuccin Latte (Blur)",
+    "dark": "Catppuccin Espresso (Blur) [Light]",
+  },
+  "ui_font_size": 15,
+  "buffer_font_size": 15,
+  "tab_size": 2,
+  "soft_wrap": "editor_width",
+  "language_models": {
+    "openai_compatible": {
+      "Symbiote": {
+        "api_url": "host:port",
+        "available_models": [
+          {
+            "name": "gemini_cli/gemini-3-pro-preview",
+            "display_name": "Gemini 3 Pro",
+            "max_tokens": 1048576,
+            "max_output_tokens": 65536,
+            "max_completion_tokens": 65536,
+            "capabilities": {
+              "tools": true,
+              "images": true,
+              "parallel_tool_calls": true,
+              "prompt_cache_key": true,
+            },
+          },
+          {
+            "name": "gemini_cli/gemini-3-flash",
+            "display_name": "Gemini 3 Flash",
+            "max_tokens": 1048576,
+            "max_output_tokens": 65536,
+            "max_completion_tokens": 65536,
+            "capabilities": {
+              "tools": true,
+              "images": true,
+              "parallel_tool_calls": true,
+              "prompt_cache_key": true,
+            },
+          },
+          {
+            "name": "antigravity/claude-opus-4-5",
+            "display_name": "Claude Opus 4.5",
+            "max_tokens": 200000,
+            "max_output_tokens": 64000,
+            "capabilities": {
+              "tools": true,
+              "images": true,
+              "parallel_tool_calls": true,
+              "prompt_cache_key": false,
+            },
+          },
+        ],
+      },
+    },
+  },
+  "lsp": {
+    "texlab": {
+      "settings": {
+        "texlab": {
+          "build": {
+            "executable": "latexmk",
+            "args": [
+              "-pdf",
+              "-interaction=nonstopmode",
+              "-synctex=1",
+              "-outdir=out.nosync",
+              "%f",
+            ],
+            "onSave": true,
+          },
+          "auxDirectory": "out.nosync",
+          "pdfDirectory": "out.nosync",
+          "forwardSearch": {
+            "executable": "/Applications/Skim.app/Contents/SharedSupport/displayline",
+            "args": ["-g", "%l", "%p", "%f"],
+          },
+        },
+      },
+    },
+  },
+}

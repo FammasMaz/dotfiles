@@ -1,16 +1,19 @@
-theme = light:flexoki-light,dark:Kanagawa Dragon
+keybind = shift+enter=text:\x1b\r
+theme = iTerm2 Pastel Dark Background
+# theme = light:Flexoki Light,dark: Vesper
+
 font-family = "CaskaydiaMono Nerd Font Mono"
-window-height = 30
-window-width = 120
+window-height = 35
+window-width = 150
 macos-titlebar-style = tabs
-auto-update-channel = tip
 shell-integration = fish
 shell-integration-features = no-cursor,sudo, title
-background-opacity = 0.85
-background-blur = true
+background-blur = macos-glass-clear
+background-opacity = 0.80
 window-colorspace = display-p3
 window-padding-balance = true
 window-padding-x = 6
 window-padding-y = 4
-keybind = global:cmd+grave_accent=toggle_quick_terminal
 scrollback-limit = 134217728
+# custom-shader = /Users/fammasmaz/.config/ghostty/shaders/cursor_smear_fade_tapered.glsl
+auto-update-channel = tip

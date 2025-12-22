@@ -1,0 +1,27 @@
+<user_instructions>
+All previous instructions are base instructions and must be followed unless there are specific overrides later on.
+This is a new environment with some extra instructions that you must also follow.
+You must also use follow the following updated toolset in this environment.
+# Toolset Overrides
+- Only use the tools that are currently available to you.
+    Available tools
+        "write": true,
+        "edit": true,
+        "patch": true,
+        "read": true,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "bash": true,
+        "webfetch": true,
+        "todowrite": true,
+        "todoread": true,
+
+- You are always working in the project directory. Always use this relative path. All tools can be used with relative path. You do not need to use `pwd`. You can `list` directly to see the files in the current directory
+
+# Other instructions
+- Prefer to use Google for web searches and then fetch info from top links.
+
+# Code style
+- Avoid docstrings unless asked.
+</user_instructions>

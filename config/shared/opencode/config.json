@@ -5,8 +5,8 @@
     "opencode-openai-codex-auth@4.2.0",
     "opencode-gemini-auth",
     "@tarquinen/opencode-dcp@latest",
-    "opencode-copilot-auth@0.0.5",
-    "opencode-anthropic-auth@0.0.2",
+    "opencode-copilot-auth@0.0.8",
+    "opencode-anthropic-auth@0.0.4",
     "./plugin/copilot-force-agent-header"
   ],
   "provider": {

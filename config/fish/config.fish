@@ -39,8 +39,9 @@ alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
 
-# Zoxide
-if command -v zoxide >/dev/null 2>&1
+if status is-interactive
+    and not set -q CLAUDECODE
+    and command -v zoxide >/dev/null 2>&1
     zoxide init fish --cmd cd | source
 end
 

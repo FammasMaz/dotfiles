@@ -34,15 +34,19 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Aliases - keep in sync with fish config concepts
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    alias cat='bat'
-else
-    alias cat='batcat'  # Linux package name
+# Skip fancy aliases in Claude Code to avoid compatibility issues
+if [[ -z "$CLAUDECODE" ]]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        alias cat='bat'
+    else
+        alias cat='batcat'  # Linux package name
+    fi
+
+    alias lsa='eza -al --icons=always --color=always --sort=date'
+    alias ls='eza -al --icons=always --color=always --sort=date'
 fi
 
 alias ghcp='gh copilot suggest'
-alias lsa='eza -al --icons=always --color=always --sort=date'
-alias ls='eza -al --icons=always --color=always --sort=date'
 alias df='duf'
 
 # Basic aliases
@@ -61,8 +65,8 @@ alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
 
-# Initialize zoxide for smart cd
-if command -v zoxide >/dev/null 2>&1; then
+# Initialize zoxide for smart cd (skip in Claude Code)
+if [[ -z "$CLAUDECODE" ]] && command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init zsh --cmd cd)"
 fi
 

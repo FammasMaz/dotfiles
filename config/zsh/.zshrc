@@ -83,7 +83,7 @@ load_zsh_plugin() {
         "/usr/share/${plugin_name}/${plugin_name}.zsh"           # System package
         "$HOME/.zsh/plugins/${plugin_name}/${plugin_name}.zsh"   # Manual install
     )
-    
+
     for location in "${locations[@]}"; do
         if [[ -f "$location" ]]; then
             source "$location"
@@ -177,6 +177,17 @@ unset conda_locations conda_path conda_base
 # Better history search
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
+
+alias opencode="bunx opencode-ai@latest"
+alias opencode-tui="bunx opencode-ai@opentui"
+alias codex="bunx @openai/codex@latest"
+alias ccusage="bunx ccusage@latest"
+alias codexusage="bunx @ccusage/codex@latest"
+# alias gemini="bunx @google/gemini-cli@latest"
+alias copilot="bunx @github/copilot@latest"
+alias cursor-cli="cursor-agent update && cursor-agent"
+alias uwu="uwu-cli"
+alias crush="bunx @charmland/crush@latest"
 
 # --- Local & Machine-Specific Overrides ---
 # For settings that should NOT be in git (secrets, machine-specific paths, work configs)

@@ -8,6 +8,10 @@ Injects a `user_instructions` tool, reminding the AI to:
 - Ask intelligent questions about pressing matters
 - Keep you in control of the conversation
 
+## Usage: 
+
+bun install
+bun run build
 ## Commands
 
 - `/aa` - Display the current instruction
@@ -16,5 +20,9 @@ Injects a `user_instructions` tool, reminding the AI to:
 - `/aa --o` - Toggle plugin on/off
 
 ## License
+
+
+
+
 
 MIT

@@ -217,7 +217,7 @@ alias crush="bunx @charmland/crush@latest"
 
 
 fish_add_path $HOME/.cargo/bin
-export OPENCODE_DISABLE_DEFAULT_PLUGINS=1
+# export OPENCODE_DISABLE_DEFAULT_PLUGINS=1
 
 # bunx
 fish_add_path $HOME/.bun/bin

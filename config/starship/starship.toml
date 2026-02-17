@@ -37,12 +37,21 @@ $time\
 
 $line_break$character"""
 
-palette = 'gruvbox_dark'
+palette = 'ghostty_dynamic'
 
-[palettes.gruvbox_dark]
+[palettes.ghostty_dynamic]
 color_fg0 = '#fbf1c7'
 color_bg1 = '#3c3836'
 color_bg3 = '#665c54'
+color_on_bg1 = '#fbf1c7'
+color_on_bg3 = '#fbf1c7'
+color_on_blue = '#1d2021'
+color_on_aqua = '#1d2021'
+color_on_green = '#1d2021'
+color_on_orange = '#1d2021'
+color_on_purple = '#1d2021'
+color_on_red = '#fbf1c7'
+color_on_yellow = '#1d2021'
 color_blue = '#458588'
 color_aqua = '#689d6a'
 color_green = '#98971a'
@@ -53,7 +62,7 @@ color_yellow = '#d79921'
 
 [os]
 disabled = false
-style = "bg:color_orange fg:color_fg0"
+style = "bg:color_orange fg:color_on_orange"
 
 [os.symbols]
 Windows = "󰍲"
@@ -81,12 +90,12 @@ Pop = ""
 
 [username]
 show_always = false
-style_user = "bg:color_orange fg:color_fg0"
-style_root = "bg:color_orange fg:color_fg0"
+style_user = "bg:color_orange fg:color_on_orange"
+style_root = "bg:color_orange fg:color_on_orange"
 format = '[ $user ]($style)'
 
 [directory]
-style = "fg:color_fg0 bg:color_yellow"
+style = "fg:color_on_yellow bg:color_yellow"
 format = "[ $path ]($style)"
 truncation_length = 4
 truncation_symbol = "…/"
@@ -103,7 +112,7 @@ truncate_to_repo = false
 [git_branch]
 symbol = ""
 style = "bg:color_aqua"
-format = '[[ $symbol $branch ](fg:color_fg0 bg:color_aqua)]($style)'
+format = '[[ $symbol $branch ](fg:color_on_aqua bg:color_aqua)]($style)'
 
 [git_status]
 style = "bg:color_aqua"
@@ -116,80 +125,80 @@ modified = "!${count} "
 staged = "+${count} "
 renamed = "»${count} "
 deleted = "✘${count} "
-format = '[[($all_status$ahead_behind)](fg:color_fg0 bg:color_aqua)]($style)'
+format = '[[($all_status$ahead_behind)](fg:color_on_aqua bg:color_aqua)]($style)'
 
 [nodejs]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [c]
 symbol = " "
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [cpp]
 symbol = " "
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [rust]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [golang]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [php]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [java]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [kotlin]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [haskell]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $version ) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $version ) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [python]
 symbol = ""
 style = "bg:color_blue"
-format = '[[ $symbol( $virtualenv) ](fg:color_fg0 bg:color_blue)]($style)'
+format = '[[ $symbol( $virtualenv) ](fg:color_on_blue bg:color_blue)]($style)'
 
 [docker_context]
 symbol = ""
 style = "bg:color_bg1"
-format = '[[ $symbol( $context) ](fg:color_fg0 bg:color_bg1)]($style)'
+format = '[[ $symbol( $context) ](fg:color_on_bg1 bg:color_bg1)]($style)'
 
 [conda]
 style = "bg:color_bg3"
-format = '[[ $symbol( $environment ) ](fg:color_fg0 bg:color_bg3)]($style)'
+format = '[[ $symbol( $environment ) ](fg:color_on_bg3 bg:color_bg3)]($style)'
 
 [pixi]
 style = "bg:color_bg3"
-format = '[[ $symbol( $version)( $environment) ](fg:color_fg0 bg:color_bg3)]($style)'
+format = '[[ $symbol( $version)( $environment) ](fg:color_on_bg3 bg:color_bg3)]($style)'
 
 [fill]
 symbol = "·"
-style = "white"
+style = "fg:color_fg0"
 
 [time]
 disabled = false
 time_format = "%m-%d %R"
 style = "bg:color_bg1"
-format = '[[   $time ](fg:color_fg0 bg:color_bg1)]($style)'
+format = '[[   $time ](fg:color_on_bg1 bg:color_bg1)]($style)'
 
 [line_break]
 disabled = false
@@ -210,21 +219,21 @@ charging_symbol = "󰂄 "
 discharging_symbol = "󰂃 "
 unknown_symbol = "󰁽 "
 empty_symbol = "󰂎 "
-format = "[[ $symbol$percentage ](fg:color_fg0 bg:color_purple)]($style)"
+format = "[[ $symbol$percentage ](fg:color_on_purple bg:color_purple)]($style)"
 
 [[battery.display]]
 threshold = 10
-style = "bg:color_red"
+style = "fg:color_on_red bg:color_red"
 
 [[battery.display]]
 threshold = 30
-style = "bg:color_orange"
+style = "fg:color_on_orange bg:color_orange"
 
 [[battery.display]]
 threshold = 100
-style = "bg:color_green"
+style = "fg:color_on_green bg:color_green"
 
 [cmd_duration]
 min_time = 500
-format = '[[ 󰔛 $duration ](fg:color_fg0 bg:color_yellow)]($style)'
+format = '[[ 󰔛 $duration ](fg:color_on_yellow bg:color_yellow)]($style)'
 style = "bg:color_yellow"

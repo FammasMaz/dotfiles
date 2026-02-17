@@ -52,7 +52,21 @@ end
 
 # Starship prompt
 if command -v starship >/dev/null 2>&1
-    set -x STARSHIP_CONFIG "$HOME/.config/starship/starship.toml"
+    set -l starship_template "$HOME/.config/starship/starship.toml"
+    set -l starship_generated "$HOME/.cache/starship/starship.ghostty.toml"
+    set -l starship_sync_script "$HOME/.dotfiles/lib/sync_starship_ghostty_palette.py"
+
+    if command -v python3 >/dev/null 2>&1
+        and test -f "$starship_sync_script"
+        python3 "$starship_sync_script" --template "$starship_template" --output "$starship_generated" >/dev/null 2>&1
+    end
+
+    if test -f "$starship_generated"
+        set -x STARSHIP_CONFIG "$starship_generated"
+    else
+        set -x STARSHIP_CONFIG "$starship_template"
+    end
+
     starship init fish | source
 end
 

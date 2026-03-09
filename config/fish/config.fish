@@ -42,32 +42,52 @@ alias gd='git diff'
 if status is-interactive
     and not set -q CLAUDECODE
     and command -v zoxide >/dev/null 2>&1
-    zoxide init fish --cmd cd | source
+    set -l _zoxide_cache "$HOME/.cache/zoxide/init.fish"
+    if not test -f "$_zoxide_cache"
+        mkdir -p (dirname "$_zoxide_cache")
+        zoxide init fish --cmd cd > "$_zoxide_cache"
+    end
+    source "$_zoxide_cache"
 end
 
-# Atuin history sync
-if command -v atuin >/dev/null 2>&1
-    atuin init fish | source
-end
 
 # Starship prompt
 if command -v starship >/dev/null 2>&1
-    set -l starship_template "$HOME/.config/starship/starship.toml"
-    set -l starship_generated "$HOME/.cache/starship/starship.ghostty.toml"
-    set -l starship_sync_script "$HOME/.dotfiles/lib/sync_starship_ghostty_palette.py"
+    set -g __starship_template "$HOME/.config/starship/starship.toml"
+    set -g __starship_generated "$HOME/.cache/starship/starship.ghostty.toml"
+    set -g __starship_sync_script "$HOME/.dotfiles/lib/sync_starship_ghostty_palette.py"
 
+    # Only re-sync palette when starship template or ghostty config has changed
+    set -l ghostty_config "$HOME/.config/ghostty/config"
     if command -v python3 >/dev/null 2>&1
-        and test -f "$starship_sync_script"
-        python3 "$starship_sync_script" --template "$starship_template" --output "$starship_generated" >/dev/null 2>&1
+        and test -f "$__starship_sync_script"
+        and begin
+            test "$__starship_template" -nt "$__starship_generated"
+            or test "$ghostty_config" -nt "$__starship_generated"
+        end
+        python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated" >/dev/null 2>&1
     end
 
-    if test -f "$starship_generated"
-        set -x STARSHIP_CONFIG "$starship_generated"
+    if test -f "$__starship_generated"
+        set -x STARSHIP_CONFIG "$__starship_generated"
     else
-        set -x STARSHIP_CONFIG "$starship_template"
+        set -x STARSHIP_CONFIG "$__starship_template"
     end
 
-    starship init fish | source
+    # Manual sync command: run after changing ghostty theme
+    function sync-starship-theme --description "Re-sync starship palette from current Ghostty theme"
+        python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated"
+        and echo "Starship palette synced from Ghostty theme."
+        or echo "Failed to sync starship palette."
+    end
+
+    # Cache starship full init output (the default is a lazy stub that re-invokes starship)
+    set -l _starship_cache "$HOME/.cache/starship/init.fish"
+    if not test -f "$_starship_cache"
+        mkdir -p (dirname "$_starship_cache")
+        starship init fish --print-full-init > "$_starship_cache"
+    end
+    source "$_starship_cache"
 end
 
 # OrbStack

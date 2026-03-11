@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import colorsys
 import re
 import subprocess
 from pathlib import Path
@@ -12,8 +13,7 @@ PALETTE_LINE_RE = re.compile(r"^(\d+)\s*=\s*(#[0-9a-fA-F]{6})$")
 KEY_VALUE_RE = re.compile(r"^([a-z0-9-]+)\s*=\s*(.+)$")
 
 DARK_BACKGROUND_LUMINANCE_THRESHOLD = 0.26
-DARK_THEME_SATURATION_BOOST = 1.35
-DARK_ACCENT_MAX_LUMINANCE = 0.55
+DARK_THEME_MIN_SATURATION = 0.4
 DARK_ACCENT_MIN_CONTRAST = 3.5
 
 
@@ -87,39 +87,18 @@ def best_contrast_text(background: str, candidates: list[str]) -> str:
     return max(unique_candidates, key=lambda color: contrast_ratio(background, color))
 
 
-def boost_saturation_preserve_luminance(color: str, factor: float) -> str:
-    if factor <= 1.0:
+def ensure_min_saturation_hsv(color: str, min_saturation: float) -> str:
+    if min_saturation <= 0.0:
         return color
 
     r8, g8, b8 = hex_to_rgb(color)
-    r = channel_to_linear(r8)
-    g = channel_to_linear(g8)
-    b = channel_to_linear(b8)
-    y = 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-    def transform(k: float) -> tuple[float, float, float]:
-        return (
-            y + (r - y) * k,
-            y + (g - y) * k,
-            y + (b - y) * k,
-        )
-
-    low = 1.0
-    high = factor
-    for _ in range(20):
-        mid = (low + high) / 2
-        tr, tg, tb = transform(mid)
-        if 0.0 <= tr <= 1.0 and 0.0 <= tg <= 1.0 and 0.0 <= tb <= 1.0:
-            low = mid
-        else:
-            high = mid
-
-    out_r, out_g, out_b = transform(low)
+    h, s, v = colorsys.rgb_to_hsv(r8 / 255, g8 / 255, b8 / 255)
+    boosted = colorsys.hsv_to_rgb(h, max(s, min(1.0, min_saturation)), v)
     return rgb_to_hex(
         (
-            linear_to_channel(out_r),
-            linear_to_channel(out_g),
-            linear_to_channel(out_b),
+            round(boosted[0] * 255),
+            round(boosted[1] * 255),
+            round(boosted[2] * 255),
         )
     )
 
@@ -148,11 +127,13 @@ def scale_luminance(color: str, target_lum: float) -> str:
         new_g = gl * factor
         new_b = bl * factor
 
-    return rgb_to_hex((
-        linear_to_channel(new_r),
-        linear_to_channel(new_g),
-        linear_to_channel(new_b),
-    ))
+    return rgb_to_hex(
+        (
+            linear_to_channel(new_r),
+            linear_to_channel(new_g),
+            linear_to_channel(new_b),
+        )
+    )
 
 
 def load_ghostty_config(ghostty_cmd: str) -> dict:
@@ -216,35 +197,14 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
     orange = blend(red, yellow, 0.5)
 
     if relative_luminance(background) < DARK_BACKGROUND_LUMINANCE_THRESHOLD:
-        red = boost_saturation_preserve_luminance(red, DARK_THEME_SATURATION_BOOST)
-        green = boost_saturation_preserve_luminance(green, DARK_THEME_SATURATION_BOOST)
-        yellow = boost_saturation_preserve_luminance(
-            yellow, DARK_THEME_SATURATION_BOOST
-        )
-        blue = boost_saturation_preserve_luminance(blue, DARK_THEME_SATURATION_BOOST)
-        purple = boost_saturation_preserve_luminance(
-            purple, DARK_THEME_SATURATION_BOOST
-        )
-        aqua = boost_saturation_preserve_luminance(aqua, DARK_THEME_SATURATION_BOOST)
-        orange = boost_saturation_preserve_luminance(
-            orange, DARK_THEME_SATURATION_BOOST
-        )
+        red = ensure_min_saturation_hsv(red, DARK_THEME_MIN_SATURATION)
+        green = ensure_min_saturation_hsv(green, DARK_THEME_MIN_SATURATION)
+        yellow = ensure_min_saturation_hsv(yellow, DARK_THEME_MIN_SATURATION)
+        blue = ensure_min_saturation_hsv(blue, DARK_THEME_MIN_SATURATION)
+        purple = ensure_min_saturation_hsv(purple, DARK_THEME_MIN_SATURATION)
+        aqua = ensure_min_saturation_hsv(aqua, DARK_THEME_MIN_SATURATION)
+        orange = ensure_min_saturation_hsv(orange, DARK_THEME_MIN_SATURATION)
 
-        # Clamp accent luminance to prevent washed-out segment backgrounds
-        def _clamp_lum(c: str) -> str:
-            if relative_luminance(c) > DARK_ACCENT_MAX_LUMINANCE:
-                return scale_luminance(c, DARK_ACCENT_MAX_LUMINANCE)
-            return c
-
-        red = _clamp_lum(red)
-        green = _clamp_lum(green)
-        yellow = _clamp_lum(yellow)
-        blue = _clamp_lum(blue)
-        purple = _clamp_lum(purple)
-        aqua = _clamp_lum(aqua)
-        orange = _clamp_lum(orange)
-
-        # Brighten colors with insufficient contrast against background
         bg_lum = relative_luminance(background)
 
         def _ensure_contrast(c: str) -> str:

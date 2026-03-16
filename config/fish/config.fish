@@ -248,6 +248,7 @@ alias copilot="bunx @github/copilot@latest"
 alias cursor-cli="cursor-agent update && cursor-agent"
 alias uwu="uwu-cli"
 alias crush="bunx @charmland/crush@latest"
+alias pi="bunx @mariozechner/pi-coding-agent"
 
 
 fish_add_path $HOME/.cargo/bin
@@ -255,3 +256,10 @@ fish_add_path $HOME/.cargo/bin
 
 # bunx
 fish_add_path $HOME/.bun/bin
+set -gx SHELL /opt/homebrew/bin/fish
+
+# Added by Antigravity
+fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
+
+# Added by Antigravity
+fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin

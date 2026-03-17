@@ -250,6 +250,9 @@ alias uwu="uwu-cli"
 alias crush="bunx @charmland/crush@latest"
 alias pi="bunx @mariozechner/pi-coding-agent"
 
+# alias for rsync
+alias rsync-ssh="rsync -avzP -e "ssh""
+
 
 fish_add_path $HOME/.cargo/bin
 # export OPENCODE_DISABLE_DEFAULT_PLUGINS=1
@@ -257,9 +260,6 @@ fish_add_path $HOME/.cargo/bin
 # bunx
 fish_add_path $HOME/.bun/bin
 set -gx SHELL /opt/homebrew/bin/fish
-
-# Added by Antigravity
-fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
 
 # Added by Antigravity
 fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin

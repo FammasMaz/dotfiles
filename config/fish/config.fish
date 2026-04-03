@@ -9,6 +9,9 @@ set -g fish_greeting ""
 if test -d "/opt/homebrew/bin"
     set -x PATH "/opt/homebrew/bin" $PATH
 end
+if test -d "/opt/nanobrew/prefix/bin"
+    set -x PATH /opt/nanobrew/prefix/bin $PATH
+end
 if test -d "$HOME/.local/bin"
     set -x PATH "$HOME/.local/bin" $PATH
 end
@@ -263,3 +266,5 @@ set -gx SHELL /opt/homebrew/bin/fish
 
 # Added by Antigravity
 fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
+
+alias openclaude="bunx @gitlawb/openclaude"

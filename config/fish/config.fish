@@ -56,16 +56,29 @@ end
 
 # Starship prompt
 if command -v starship >/dev/null 2>&1
-    set -g __starship_template "$HOME/.config/starship/starship.toml"
-    set -g __starship_generated "$HOME/.cache/starship/starship.ghostty.toml"
     set -g __starship_sync_script "$HOME/.dotfiles/lib/sync_starship_ghostty_palette.py"
+    set -g __starship_template "$HOME/.config/starship/starship.toml"
 
-    # Only re-sync palette when starship template or ghostty config has changed
+    # Detect macOS appearance mode → separate cache per mode
+    # Ghostty with light:/dark: themes changes colors on mode switch
+    # but config file timestamp stays the same → stale palette
+    set -l _appearance "default"
+    if type -q defaults
+        if defaults read -g AppleInterfaceStyle >/dev/null 2>&1
+            set _appearance "dark"
+        else
+            set _appearance "light"
+        end
+    end
+    set -g __starship_generated "$HOME/.cache/starship/starship.ghostty.$_appearance.toml"
+
+    # Re-sync when template, ghostty config, or appearance mode differs from cache
     set -l ghostty_config "$HOME/.config/ghostty/config"
     if command -v python3 >/dev/null 2>&1
         and test -f "$__starship_sync_script"
         and begin
-            test "$__starship_template" -nt "$__starship_generated"
+            not test -f "$__starship_generated"
+            or test "$__starship_template" -nt "$__starship_generated"
             or test "$ghostty_config" -nt "$__starship_generated"
         end
         python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated" >/dev/null 2>&1
@@ -268,3 +281,6 @@ set -gx SHELL /opt/homebrew/bin/fish
 fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
 
 alias openclaude="bunx @gitlawb/openclaude"
+
+# Added by Antigravity
+fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin

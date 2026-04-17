@@ -15,6 +15,11 @@ KEY_VALUE_RE = re.compile(r"^([a-z0-9-]+)\s*=\s*(.+)$")
 DARK_BACKGROUND_LUMINANCE_THRESHOLD = 0.26
 DARK_THEME_MIN_SATURATION = 0.4
 DARK_ACCENT_MIN_CONTRAST = 3.5
+DARK_ACCENT_MAX_LUMINANCE = 0.45
+
+LIGHT_THEME_MIN_SATURATION = 0.45
+LIGHT_ACCENT_MIN_CONTRAST = 4.0
+LIGHT_ACCENT_MAX_LUMINANCE = 0.35
 
 
 def normalize_hex(value: str) -> str | None:
@@ -196,7 +201,10 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
     aqua = colors.get(6) or "#689d6a"
     orange = blend(red, yellow, 0.5)
 
-    if relative_luminance(background) < DARK_BACKGROUND_LUMINANCE_THRESHOLD:
+    bg_lum = relative_luminance(background)
+    is_dark = bg_lum < DARK_BACKGROUND_LUMINANCE_THRESHOLD
+
+    if is_dark:
         red = ensure_min_saturation_hsv(red, DARK_THEME_MIN_SATURATION)
         green = ensure_min_saturation_hsv(green, DARK_THEME_MIN_SATURATION)
         yellow = ensure_min_saturation_hsv(yellow, DARK_THEME_MIN_SATURATION)
@@ -205,26 +213,59 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
         aqua = ensure_min_saturation_hsv(aqua, DARK_THEME_MIN_SATURATION)
         orange = ensure_min_saturation_hsv(orange, DARK_THEME_MIN_SATURATION)
 
-        bg_lum = relative_luminance(background)
-
-        def _ensure_contrast(c: str) -> str:
+        def _ensure_dark_contrast(c: str) -> str:
+            # Floor: ensure minimum contrast
             if contrast_ratio(c, background) < DARK_ACCENT_MIN_CONTRAST:
                 target_lum = DARK_ACCENT_MIN_CONTRAST * (bg_lum + 0.05) - 0.05
                 target_lum = max(target_lum, 0.15)
+                c = scale_luminance(c, target_lum)
+            # Ceiling: cap luminance so accents aren't washed out / pastel
+            if relative_luminance(c) > DARK_ACCENT_MAX_LUMINANCE:
+                c = scale_luminance(c, DARK_ACCENT_MAX_LUMINANCE)
+            return c
+
+        red = _ensure_dark_contrast(red)
+        green = _ensure_dark_contrast(green)
+        yellow = _ensure_dark_contrast(yellow)
+        blue = _ensure_dark_contrast(blue)
+        purple = _ensure_dark_contrast(purple)
+        aqua = _ensure_dark_contrast(aqua)
+        orange = _ensure_dark_contrast(orange)
+    else:
+        # Light theme: boost saturation and darken colors for contrast on bright bg
+        red = ensure_min_saturation_hsv(red, LIGHT_THEME_MIN_SATURATION)
+        green = ensure_min_saturation_hsv(green, LIGHT_THEME_MIN_SATURATION)
+        yellow = ensure_min_saturation_hsv(yellow, LIGHT_THEME_MIN_SATURATION)
+        blue = ensure_min_saturation_hsv(blue, LIGHT_THEME_MIN_SATURATION)
+        purple = ensure_min_saturation_hsv(purple, LIGHT_THEME_MIN_SATURATION)
+        aqua = ensure_min_saturation_hsv(aqua, LIGHT_THEME_MIN_SATURATION)
+        orange = ensure_min_saturation_hsv(orange, LIGHT_THEME_MIN_SATURATION)
+
+        def _ensure_light_contrast(c: str) -> str:
+            cr = contrast_ratio(c, background)
+            if cr < LIGHT_ACCENT_MIN_CONTRAST:
+                # Darken: target luminance such that contrast ratio meets minimum
+                target_lum = (bg_lum + 0.05) / LIGHT_ACCENT_MIN_CONTRAST - 0.05
+                target_lum = min(target_lum, LIGHT_ACCENT_MAX_LUMINANCE)
+                target_lum = max(target_lum, 0.03)
                 return scale_luminance(c, target_lum)
             return c
 
-        red = _ensure_contrast(red)
-        green = _ensure_contrast(green)
-        yellow = _ensure_contrast(yellow)
-        blue = _ensure_contrast(blue)
-        purple = _ensure_contrast(purple)
-        aqua = _ensure_contrast(aqua)
-        orange = _ensure_contrast(orange)
+        red = _ensure_light_contrast(red)
+        green = _ensure_light_contrast(green)
+        yellow = _ensure_light_contrast(yellow)
+        blue = _ensure_light_contrast(blue)
+        purple = _ensure_light_contrast(purple)
+        aqua = _ensure_light_contrast(aqua)
+        orange = _ensure_light_contrast(orange)
+
+    # Offset bg1 from terminal background so prompt segments are visible
+    # Blend slightly toward foreground to create visual separation
+    prompt_bg = blend(background, foreground, 0.12)
 
     contrast_candidates = [foreground, background, "#ffffff", "#000000"]
 
-    on_bg1 = best_contrast_text(background, contrast_candidates)
+    on_bg1 = best_contrast_text(prompt_bg, contrast_candidates)
     on_bg3 = best_contrast_text(selection_background, contrast_candidates)
     on_blue = best_contrast_text(blue, contrast_candidates)
     on_aqua = best_contrast_text(aqua, contrast_candidates)
@@ -236,7 +277,7 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
 
     return {
         "color_fg0": foreground,
-        "color_bg1": background,
+        "color_bg1": prompt_bg,
         "color_bg3": selection_background,
         "color_on_bg1": on_bg1,
         "color_on_bg3": on_bg3,

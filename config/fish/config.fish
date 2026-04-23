@@ -6,10 +6,10 @@ set -g fish_greeting ""
 
 # Environment variables
 # Only add paths that exist to avoid warnings
-if test -d "/opt/homebrew/bin"
-    set -x PATH "/opt/homebrew/bin" $PATH
+if test -d /opt/homebrew/bin
+    set -x PATH /opt/homebrew/bin $PATH
 end
-if test -d "/opt/nanobrew/prefix/bin"
+if test -d /opt/nanobrew/prefix/bin
     set -x PATH /opt/nanobrew/prefix/bin $PATH
 end
 if test -d "$HOME/.local/bin"
@@ -18,7 +18,7 @@ end
 
 # Aliases
 # if macos use bat else batcat
-if test (uname) = "Darwin"
+if test (uname) = Darwin
     alias cat='bat'
 else
     alias cat='batcat'
@@ -48,11 +48,10 @@ if status is-interactive
     set -l _zoxide_cache "$HOME/.cache/zoxide/init.fish"
     if not test -f "$_zoxide_cache"
         mkdir -p (dirname "$_zoxide_cache")
-        zoxide init fish --cmd cd > "$_zoxide_cache"
+        zoxide init fish --cmd cd >"$_zoxide_cache"
     end
     source "$_zoxide_cache"
 end
-
 
 # Starship prompt
 if command -v starship >/dev/null 2>&1
@@ -62,12 +61,12 @@ if command -v starship >/dev/null 2>&1
     # Detect macOS appearance mode → separate cache per mode
     # Ghostty with light:/dark: themes changes colors on mode switch
     # but config file timestamp stays the same → stale palette
-    set -l _appearance "default"
+    set -l _appearance default
     if type -q defaults
         if defaults read -g AppleInterfaceStyle >/dev/null 2>&1
-            set _appearance "dark"
+            set _appearance dark
         else
-            set _appearance "light"
+            set _appearance light
         end
     end
     set -g __starship_generated "$HOME/.cache/starship/starship.ghostty.$_appearance.toml"
@@ -101,7 +100,7 @@ if command -v starship >/dev/null 2>&1
     set -l _starship_cache "$HOME/.cache/starship/init.fish"
     if not test -f "$_starship_cache"
         mkdir -p (dirname "$_starship_cache")
-        starship init fish --print-full-init > "$_starship_cache"
+        starship init fish --print-full-init >"$_starship_cache"
     end
     source "$_starship_cache"
 end
@@ -112,7 +111,7 @@ if test -f ~/.orbstack/shell/init.fish
 end
 
 # Environment Modules (common on HPC systems)
-if test -f "/usr/share/Modules/init/fish"
+if test -f /usr/share/Modules/init/fish
     # Try to source the fish module init, but handle syntax errors gracefully
     if not source /usr/share/Modules/init/fish 2>/dev/null
         echo "⚠️  Environment Modules fish init has syntax errors, using bash fallback"
@@ -130,7 +129,6 @@ if command -v uv >/dev/null 2>&1
         source "$HOME/.local/share/uv/completion/uv.fish"
     end
 end
-
 
 # Added by OrbStack: command-line tools and integration
 # This won't be added again if you remove it.
@@ -187,14 +185,14 @@ function fish_title
                 continue
             end
             if test $in_sudo -eq 0
-                if test "$word" = "sudo"
+                if test "$word" = sudo
                     set in_sudo 1
                     continue
                 end
                 set cmd $word
                 break
             else
-                if test "$word" = "--"
+                if test "$word" = --
                     set in_sudo 0
                     continue
                 end
@@ -220,7 +218,7 @@ function fish_title
             set cmd $words[1]
         end
     end
-    set -l where (prompt_pwd)                              # ~/…/dir
+    set -l where (prompt_pwd) # ~/…/dir
     set -l hostseg
     # Check for SSH connection using multiple methods
     if set -q SSH_TTY; or set -q SSH_CLIENT; or set -q SSH_CONNECTION
@@ -269,7 +267,6 @@ alias pi="bunx @mariozechner/pi-coding-agent"
 # alias for rsync
 alias rsync-ssh="rsync -avzP -e "ssh""
 
-
 fish_add_path $HOME/.cargo/bin
 # export OPENCODE_DISABLE_DEFAULT_PLUGINS=1
 
@@ -281,6 +278,4 @@ set -gx SHELL /opt/homebrew/bin/fish
 fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
 
 alias openclaude="bunx @gitlawb/openclaude"
-
-# Added by Antigravity
-fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
+alias vim="nvim"

@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""
+Sync Pi agent OpenAI Codex OAuth credentials into LLM-API-Key-Proxy.
+
+Default source:
+  ~/.pi/agent/auth.json
+
+Default destination:
+  ~/Downloads/LLM-API-Key-Proxy/oauth_creds
+"""
+
+import argparse
+import json
+import os
+import shutil
+import sys
+import time
+from pathlib import Path
+
+
+def parse_args():
+    home = Path.home()
+    parser = argparse.ArgumentParser(
+        description="Export Pi agent openai-codex OAuth credentials for LLM-API-Key-Proxy."
+    )
+    parser.add_argument(
+        "--source",
+        default=str(home / ".pi" / "agent" / "auth.json"),
+        help="Pi auth.json path. Default: ~/.pi/agent/auth.json",
+    )
+    parser.add_argument(
+        "--dest-dir",
+        default=str(home / "Downloads" / "LLM-API-Key-Proxy" / "oauth_creds"),
+        help="Proxy oauth_creds directory. Default: ~/Downloads/LLM-API-Key-Proxy/oauth_creds",
+    )
+    parser.add_argument(
+        "--prefix",
+        default="codex_oauth",
+        help="Output filename prefix. Default: codex_oauth",
+    )
+    parser.add_argument(
+        "--no-backup",
+        action="store_true",
+        help="Delete existing matching files instead of moving them to a timestamped backup directory.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would happen without writing files.",
+    )
+    return parser.parse_args()
+
+
+def credential_sort_key(name):
+    if name == "openai-codex":
+        return 0
+    try:
+        return int(name.rsplit("-", 1)[1])
+    except Exception:
+        return 999999
+
+
+def load_json(path):
+    try:
+        with path.open() as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise SystemExit(f"Source file not found: {path}")
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Invalid JSON in {path}: {exc}")
+
+
+def find_codex_credentials(data):
+    keys = [
+        key for key, value in data.items()
+        if (key == "openai-codex" or key.startswith("openai-codex-"))
+        and isinstance(value, dict)
+        and value.get("type") == "oauth"
+    ]
+    return sorted(keys, key=credential_sort_key)
+
+
+def expiry_seconds(value):
+    if not value:
+        return 0
+    try:
+        numeric = float(value)
+    except Exception:
+        return 0
+    # Pi stores milliseconds; the proxy expects seconds.
+    return numeric / 1000 if numeric > 1_000_000_000_000 else numeric
+
+
+def build_proxy_credential(source, source_key, item):
+    return {
+        "api_key": None,
+        "access_token": item.get("access"),
+        "refresh_token": item.get("refresh"),
+        "id_token": item.get("id_token") or item.get("idToken"),
+        "account_id": item.get("accountId"),
+        "expiry_date": expiry_seconds(item.get("expires")),
+        "_proxy_metadata": {
+            "source": str(source),
+            "source_credential_id": source_key,
+            "imported_from": "pi_agent_auth",
+            "imported_at": time.time(),
+            "last_check_timestamp": time.time(),
+        },
+    }
+
+
+def backup_or_remove_existing(dest_dir, prefix, no_backup, dry_run):
+    existing = sorted(dest_dir.glob(f"{prefix}_*.json"))
+    if not existing:
+        return None, 0
+
+    if no_backup:
+        if not dry_run:
+            for path in existing:
+                path.unlink()
+        return None, len(existing)
+
+    backup_dir = dest_dir / f"{prefix}_backup_{int(time.time())}"
+    if not dry_run:
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        for path in existing:
+            shutil.move(str(path), str(backup_dir / path.name))
+    return backup_dir, len(existing)
+
+
+def main():
+    args = parse_args()
+    source = Path(args.source).expanduser().resolve()
+    dest_dir = Path(args.dest_dir).expanduser()
+
+    data = load_json(source)
+    keys = find_codex_credentials(data)
+    if not keys:
+        raise SystemExit(f"No openai-codex OAuth credentials found in {source}")
+
+    if args.dry_run:
+        print("DRY RUN: no files will be changed")
+    else:
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+    backup_dir, old_count = backup_or_remove_existing(
+        dest_dir, args.prefix, args.no_backup, args.dry_run
+    )
+
+    created = []
+    for index, key in enumerate(keys, start=1):
+        item = data[key]
+        if not item.get("access") or not item.get("refresh"):
+            print(f"Skipping {key}: missing access or refresh token", file=sys.stderr)
+            continue
+
+        output = build_proxy_credential(source, key, item)
+        output_path = dest_dir / f"{args.prefix}_{index}.json"
+        created.append((output_path, key, output.get("account_id"), output.get("expiry_date")))
+
+        if not args.dry_run:
+            with output_path.open("w") as f:
+                json.dump(output, f, indent=2)
+                f.write("\n")
+            os.chmod(output_path, 0o600)
+
+    verb = "Would create" if args.dry_run else "Created"
+    if old_count and args.no_backup:
+        action = "Would remove" if args.dry_run else "Removed"
+        print(f"{action} {old_count} previous {args.prefix}_*.json file(s)")
+    elif old_count:
+        action = "Would back up" if args.dry_run else "Backed up"
+        print(f"{action} {old_count} previous file(s) to: {backup_dir}")
+
+    print(f"{verb} {len(created)} Codex OAuth credential file(s) from {source}")
+    for output_path, key, account_id, expiry in created:
+        account_preview = f"{account_id[:8]}..." if account_id else "no-account-id"
+        print(f"  {output_path.name} <- {key} ({account_preview}, expires {expiry:.0f})")
+
+
+if __name__ == "__main__":
+    main()

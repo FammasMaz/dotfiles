@@ -15,6 +15,9 @@ end
 if test -d "$HOME/.local/bin"
     set -x PATH "$HOME/.local/bin" $PATH
 end
+if test -d "$HOME/.dotfiles/bin"
+    set -x PATH "$HOME/.dotfiles/bin" $PATH
+end
 
 # Aliases
 # if macos use bat else batcat

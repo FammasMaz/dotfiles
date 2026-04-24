@@ -20,6 +20,9 @@ setopt ALWAYS_TO_END
 
 # PATH configuration
 export PATH="$HOME/.local/bin:$PATH"
+if [[ -d "$HOME/.dotfiles/bin" ]]; then
+    export PATH="$HOME/.dotfiles/bin:$PATH"
+fi
 
 # macOS Homebrew paths
 if [[ "$OSTYPE" == "darwin"* ]]; then

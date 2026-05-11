@@ -265,7 +265,7 @@ alias copilot="bunx @github/copilot@latest"
 alias cursor-cli="cursor-agent update && cursor-agent"
 alias uwu="uwu-cli"
 alias crush="bunx @charmland/crush@latest"
-alias pi="bunx @mariozechner/pi-coding-agent"
+alias pi="bunx @earendil-works/pi-coding-agent@latest"
 
 # alias for rsync
 alias rsync-ssh="rsync -avzP -e "ssh""

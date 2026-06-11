@@ -282,3 +282,7 @@ fish_add_path /Users/fammasmaz/.antigravity/antigravity/bin
 
 alias openclaude="bunx @gitlawb/openclaude"
 alias vim="nvim"
+
+# >>> grok installer >>>
+fish_add_path $HOME/.grok/bin
+# <<< grok installer <<<

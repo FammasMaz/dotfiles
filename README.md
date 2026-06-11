@@ -20,6 +20,7 @@ make install
 - 🔄 **Idempotent**: Safe to run multiple times
 - 🎨 **Oh My Posh** themes included
 - ⚡ **Modern tools**: bat, eza, zoxide, fzf, etc.
+- 🧰 **Helper scripts**: repo scripts in `bin/` are linked into `~/.local/bin`
 
 ## Directory Structure
 
@@ -27,6 +28,7 @@ make install
 .
 ├── setup.sh                # Universal entry point
 ├── Makefile                # Simple targets (install, update, etc.)
+├── bin/                    # Helper scripts linked into ~/.local/bin
 │
 ├── lib/                    # Core libraries
 │   ├── os_detect.sh        # OS & package manager detection
@@ -41,7 +43,7 @@ make install
 │
 └── config/               # Configuration files
     ├── fish/            # Fish shell configs
-    ├── zsh/             # Zsh configs  
+    ├── zsh/             # Zsh configs
     └── shared/          # Shared configs (git, themes, etc.)
 ```
 
@@ -65,6 +67,17 @@ make update        # Update repo and reinstall
 make clean         # Reset setup state
 ```
 
+### GitHub repo helper
+```bash
+# From inside a project folder; repo name defaults to the folder name
+create-github-repo
+
+# Create a private repo instead
+ghrepo --private
+```
+
+The helper initializes git if needed, creates the GitHub repo with `gh`, adds it as `origin`, and pushes the current branch when commits exist. Folder names with spaces/symbols are converted to valid repo names with hyphens.
+
 ### Custom configs
 If you want to add custom stuff in your local configs, add them to $HOME/.config/fish/local.d/01-custom.fish
 
@@ -86,7 +99,7 @@ If you want to add custom stuff in your local configs, add them to $HOME/.config
 - Miniconda
 - Zsh plugins via Homebrew
 
-### Linux Additions  
+### Linux Additions
 - Build tools (gcc, make)
 - Development libraries
 - Distribution-specific packages
@@ -125,7 +138,7 @@ If you want to add custom stuff in your local configs, add them to $HOME/.config
 ### Adding Packages
 Edit the appropriate package file:
 - `install/packages.common` - All platforms
-- `install/packages.macos` - macOS only  
+- `install/packages.macos` - macOS only
 - `install/packages.linux_*` - Linux distributions
 
 ### Shell Configs

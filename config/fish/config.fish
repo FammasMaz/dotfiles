@@ -44,6 +44,7 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
+alias ghrepo='create-github-repo'
 
 if status is-interactive
     and not set -q CLAUDECODE

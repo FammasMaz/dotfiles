@@ -67,6 +67,7 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
+alias ghrepo='create-github-repo'
 
 # Initialize zoxide for smart cd (skip in Claude Code)
 if [[ -z "$CLAUDECODE" ]] && command -v zoxide >/dev/null 2>&1; then

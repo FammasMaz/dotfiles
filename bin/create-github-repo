@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat <<'USAGE'
+Usage: create-github-repo [--private|--public] [--no-push] [--name NAME]
+
+Create a GitHub repository for the current folder using GitHub CLI (`gh`).
+The repo name defaults to the current directory name, with invalid characters
+converted to hyphens. The script initializes a local git repo if needed,
+creates the GitHub repo, adds it as `origin`, and pushes the current branch
+when commits already exist.
+
+Options:
+  --private       Create a private GitHub repository.
+  --public        Create a public GitHub repository (default).
+  --no-push       Create the remote and add origin, but do not push.
+  --name NAME     Override the repo name instead of using the folder name.
+  -h, --help      Show this help.
+
+Examples:
+  create-github-repo
+  create-github-repo --private
+  ghrepo --private --no-push
+USAGE
+}
+
+error() {
+    printf 'Error: %s\n' "$*" >&2
+}
+
+require_cmd() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        error "Missing required command: $1"
+        return 1
+    fi
+}
+
+normalize_repo_name() {
+    printf '%s' "$1" | sed -E 's/[^A-Za-z0-9._-]+/-/g; s/^-+//; s/-+$//; s/-{2,}/-/g'
+}
+
+repo_name=""
+visibility="--public"
+push_after_create=1
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --private)
+            visibility="--private"
+            ;;
+        --public)
+            visibility="--public"
+            ;;
+        --no-push)
+            push_after_create=0
+            ;;
+        --name)
+            shift
+            if [[ $# -eq 0 || -z "$1" ]]; then
+                error "--name requires a value"
+                exit 2
+            fi
+            repo_name="$1"
+            ;;
+        --name=*)
+            repo_name="${1#--name=}"
+            if [[ -z "$repo_name" ]]; then
+                error "--name requires a value"
+                exit 2
+            fi
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            error "Unknown option: $1"
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+require_cmd git
+require_cmd gh
+
+if [[ -z "$repo_name" ]]; then
+    folder_name="$(basename "$PWD")"
+    repo_name="$(normalize_repo_name "$folder_name")"
+    if [[ "$repo_name" != "$folder_name" ]]; then
+        printf "Using repo name '%s' from folder name '%s'\n" "$repo_name" "$folder_name"
+    fi
+fi
+
+if [[ -z "$repo_name" || "$repo_name" == "/" || "$repo_name" == "." ]]; then
+    error "Could not infer a repository name from the current folder"
+    exit 1
+fi
+
+if [[ ! "$repo_name" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    error "Invalid repo name '$repo_name'. Use letters, numbers, '.', '_' or '-' only, or pass --name."
+    exit 1
+fi
+
+if ! gh auth status >/dev/null 2>&1; then
+    error "GitHub CLI is not authenticated. Run: gh auth login"
+    exit 1
+fi
+
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git_root="$(git rev-parse --show-toplevel)"
+    cwd_real="$(pwd -P)"
+    git_root_real="$(cd "$git_root" && pwd -P)"
+
+    if [[ "$cwd_real" != "$git_root_real" ]]; then
+        error "Run this from the git repository root: $git_root_real"
+        exit 1
+    fi
+else
+    printf 'Initializing git repository in %s\n' "$PWD"
+    if ! git init -b main >/dev/null 2>&1; then
+        git init >/dev/null
+    fi
+fi
+
+if git remote get-url origin >/dev/null 2>&1; then
+    existing_origin="$(git remote get-url origin)"
+    error "origin already exists: $existing_origin"
+    exit 1
+fi
+
+printf 'Creating %s GitHub repository: %s\n' "${visibility#--}" "$repo_name"
+GH_PROMPT_DISABLED=1 gh repo create "$repo_name" "$visibility" --source=. --remote=origin
+
+if [[ "$push_after_create" -eq 1 ]]; then
+    if git rev-parse --verify HEAD >/dev/null 2>&1; then
+        branch="$(git branch --show-current)"
+        if [[ -z "$branch" ]]; then
+            printf 'Remote origin added, but current checkout is detached. Push manually when ready.\n'
+        else
+            printf 'Pushing %s to origin and setting upstream...\n' "$branch"
+            git push -u origin "$branch"
+        fi
+    else
+        branch="$(git branch --show-current 2>/dev/null || true)"
+        printf 'Remote origin added. No commits found, so nothing was pushed.\n'
+        printf '\nNext steps:\n'
+        printf '  git add .\n'
+        printf "  git commit -m 'Initial commit'\n"
+        if [[ -n "$branch" ]]; then
+            printf '  git push -u origin %s\n' "$branch"
+        else
+            printf '  git push -u origin HEAD\n'
+        fi
+    fi
+else
+    printf 'Remote origin added. Skipped push because --no-push was provided.\n'
+fi
+
+repo_url="$(gh repo view --json url --jq .url 2>/dev/null || true)"
+if [[ -z "$repo_url" ]]; then
+    repo_url="$(git remote get-url origin 2>/dev/null || true)"
+fi
+
+if [[ -n "$repo_url" ]]; then
+    printf '\nDone: %s\n' "$repo_url"
+else
+    printf '\nDone.\n'
+fi

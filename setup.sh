@@ -30,31 +30,31 @@ show_banner() {
 # Check prerequisites
 check_prerequisites() {
     log_step "Checking prerequisites..."
-    
+
     # Check if we're in the dotfiles directory
     if [ ! -f "$DOTFILES_DIR/setup.sh" ]; then
         log_error "Setup script not found in expected location: $DOTFILES_DIR"
         exit 1
     fi
-    
+
     # Check for git (needed for some installations)
     if ! command_exists git; then
         log_warning "Git not found. Some features may not work properly."
     fi
-    
+
     # Check for curl (needed for downloads)
     if ! command_exists curl; then
         log_error "curl is required but not found. Please install curl first."
         exit 1
     fi
-    
+
     log_success "Prerequisites check complete"
 }
 
 # Install packages using the package installer
 install_packages() {
     log_step "Installing packages..."
-    
+
     if [ -f "$DOTFILES_DIR/install/packages.sh" ]; then
         bash "$DOTFILES_DIR/install/packages.sh"
     else
@@ -65,9 +65,9 @@ install_packages() {
 # Setup shell configuration
 setup_shell() {
     log_step "Setting up shell configuration..."
-    
+
     local chosen_shell=""
-    
+
     # Try to install and setup preferred shell (fish)
     if command_exists "$PREFERRED_SHELL" || attempt_shell_install "$PREFERRED_SHELL"; then
         log_info "Setting up $PREFERRED_SHELL as primary shell"
@@ -79,7 +79,7 @@ setup_shell() {
         log_error "Neither $PREFERRED_SHELL nor $FALLBACK_SHELL could be installed"
         return 1
     fi
-    
+
     # Configure the chosen shell
     if [ -f "$DOTFILES_DIR/install/shell.sh" ]; then
         bash "$DOTFILES_DIR/install/shell.sh" "$chosen_shell"
@@ -97,14 +97,14 @@ attempt_shell_install() {
         log_warning "Cannot install $shell_name due to --no-sudo. Setup will continue only if it's already installed."
         return 1
     fi
-    
+
     if [ "$PACKAGE_MANAGER" = "unknown" ]; then
         log_warning "No package manager available to install $shell_name"
         return 1
     fi
-    
+
     log_info "Attempting to install $shell_name..."
-    
+
     case "$shell_name" in
         fish)
             install_packages fish
@@ -117,7 +117,7 @@ attempt_shell_install() {
             return 1
             ;;
     esac
-    
+
     # Verify installation
     if command_exists "$shell_name"; then
         log_success "$shell_name installed successfully"
@@ -131,9 +131,9 @@ attempt_shell_install() {
 # Fallback shell setup if the main installer isn't available
 setup_shell_fallback() {
     local shell_name="$1"
-    
+
     log_info "Using fallback shell configuration for $shell_name"
-    
+
     case "$shell_name" in
         fish)
             setup_fish_fallback
@@ -147,14 +147,17 @@ setup_shell_fallback() {
 # Fallback Fish configuration
 setup_fish_fallback() {
     local fish_config_dir="$HOME/.config/fish"
-    
+
     # Create fish config directory
     mkdir -p "$fish_config_dir"
-    
+
     # Link config if available
     if [ -f "$DOTFILES_DIR/config/fish/config.fish" ]; then
         safe_symlink "$DOTFILES_DIR/config/fish/config.fish" "$fish_config_dir/config.fish"
     fi
+
+    # Link helper scripts into ~/.local/bin
+    setup_dotfiles_bin "$DOTFILES_DIR"
     
     # Offer to change default shell
     if ! is_default_shell fish; then
@@ -168,6 +171,9 @@ setup_zsh_fallback() {
     if [ -f "$DOTFILES_DIR/config/zsh/.zshrc" ]; then
         safe_symlink "$DOTFILES_DIR/config/zsh/.zshrc" "$HOME/.zshrc"
     fi
+
+    # Link helper scripts into ~/.local/bin
+    setup_dotfiles_bin "$DOTFILES_DIR"
     
     # Offer to change default shell
     if ! is_default_shell zsh; then
@@ -178,15 +184,15 @@ setup_zsh_fallback() {
 # Setup additional configurations
 setup_additional_configs() {
     log_step "Setting up additional configurations..."
-    
+
     # Create dotfiles symlink for easy access
     safe_symlink "$DOTFILES_DIR" "$HOME/.dotfiles"
-    
+
     # Setup git configuration if available
     if [ -f "$DOTFILES_DIR/config/shared/.gitconfig" ]; then
         safe_symlink "$DOTFILES_DIR/config/shared/.gitconfig" "$HOME/.gitconfig"
     fi
-    
+
     # Setup other shared configurations
     for config_file in "$DOTFILES_DIR/config/shared"/.??*; do
         if [ -f "$config_file" ] && [ "$(basename "$config_file")" != ".gitconfig" ]; then
@@ -198,24 +204,24 @@ setup_additional_configs() {
 # Setup development tools and environment
 setup_development_environment() {
     log_step "Setting up development environment..."
-    
+
     # Install fisher for fish (if fish is the chosen shell)
     if command_exists fish && ! fish -c "type -q fisher" 2>/dev/null; then
         log_info "Installing fisher (fish plugin manager)..."
         fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher" 2>/dev/null || true
     fi
-    
+
     # Install common fish plugins
     if command_exists fish; then
         fish -c "fisher install jethrokuan/z" 2>/dev/null || true
         fish -c "fisher install PatrickF1/fzf.fish" 2>/dev/null || true
     fi
-    
+
     # Initialize zoxide if available
     if command_exists zoxide; then
         log_debug "zoxide is available and will be initialized in shell configs"
     fi
-    
+
     # Setup starship prompt configuration if available
     if [ -f "$DOTFILES_DIR/config/starship/starship.toml" ]; then
         safe_symlink "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
@@ -225,10 +231,10 @@ setup_development_environment() {
 # Post-installation steps and recommendations
 show_next_steps() {
     header "🎉 Setup Complete!"
-    
+
     echo "Next steps:"
     echo ""
-    
+
     # Shell-specific instructions
     if command_exists fish && is_default_shell fish; then
         echo "✅ Fish shell is configured and set as default"
@@ -241,21 +247,22 @@ show_next_steps() {
         echo "🐚 Zsh is configured. To set as default, run:"
         echo "   chsh -s $(command -v zsh)"
     fi
-    
+
     echo ""
     echo "🔄 Restart your terminal or run: exec \$SHELL"
     echo "📁 Your dotfiles are linked from: $DOTFILES_DIR"
     echo "🔗 Quick access via: ~/.dotfiles"
-    
+    echo "🧰 Helper scripts are linked into: ~/.local/bin"
+
     if command_exists gh; then
         echo "🐙 GitHub CLI is available. Authenticate with: gh auth login"
     fi
-    
+
     if setup_already_run; then
         echo ""
         echo "💡 Setup has been run before. This was an update/re-run."
     fi
-    
+
     echo ""
     separator
 }
@@ -301,23 +308,23 @@ main() {
     if [ "$NO_SUDO" -eq 1 ]; then
         log_info "Running in --no-sudo mode. Sudo-required operations will be skipped."
     fi
-    
+
     if [ "$DEBUG" -eq 1 ]; then
         log_debug "Debug mode enabled"
     fi
-    
+
     show_banner
-    
+
     # Main setup flow
     check_prerequisites
     install_packages
     setup_shell
     setup_additional_configs
     setup_development_environment
-    
+
     # Mark setup as complete
     mark_setup_complete
-    
+
     show_next_steps
 }
 

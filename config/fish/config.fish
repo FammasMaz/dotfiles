@@ -83,8 +83,9 @@ if command -v starship >/dev/null 2>&1
             not test -f "$__starship_generated"
             or test "$__starship_template" -nt "$__starship_generated"
             or test "$ghostty_config" -nt "$__starship_generated"
+            or test "$__starship_sync_script" -nt "$__starship_generated"
         end
-        python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated" >/dev/null 2>&1
+        python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated" --appearance "$_appearance" >/dev/null 2>&1
     end
 
     if test -f "$__starship_generated"
@@ -95,7 +96,15 @@ if command -v starship >/dev/null 2>&1
 
     # Manual sync command: run after changing ghostty theme
     function sync-starship-theme --description "Re-sync starship palette from current Ghostty theme"
-        python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated"
+        set -l _sync_appearance default
+        if type -q defaults
+            if defaults read -g AppleInterfaceStyle >/dev/null 2>&1
+                set _sync_appearance dark
+            else
+                set _sync_appearance light
+            end
+        end
+        python3 "$__starship_sync_script" --template "$__starship_template" --output "$HOME/.cache/starship/starship.ghostty.$_sync_appearance.toml" --appearance "$_sync_appearance"
         and echo "Starship palette synced from Ghostty theme."
         or echo "Failed to sync starship palette."
     end

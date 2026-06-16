@@ -2,8 +2,10 @@
 
 import argparse
 import colorsys
+import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -17,9 +19,10 @@ DARK_THEME_MIN_SATURATION = 0.4
 DARK_ACCENT_MIN_CONTRAST = 3.5
 DARK_ACCENT_MAX_LUMINANCE = 0.45
 
-LIGHT_THEME_MIN_SATURATION = 0.45
-LIGHT_ACCENT_MIN_CONTRAST = 4.0
-LIGHT_ACCENT_MAX_LUMINANCE = 0.35
+LIGHT_THEME_MIN_SATURATION = 0.52
+LIGHT_ACCENT_MIN_CONTRAST = 3.0
+LIGHT_ACCENT_MAX_LUMINANCE = 0.48
+LIGHT_PROMPT_BG_BLEND = 0.28
 
 
 def normalize_hex(value: str) -> str | None:
@@ -141,21 +144,52 @@ def scale_luminance(color: str, target_lum: float) -> str:
     )
 
 
-def load_ghostty_config(ghostty_cmd: str) -> dict:
-    try:
-        result = subprocess.run(
-            [ghostty_cmd, "+show-config"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return {}
+THEME_PAIR_RE = re.compile(
+    r"light\s*:\s*([^,]+?)\s*,\s*dark\s*:\s*(.+?)(?:\s*,\s*|$)",
+    re.IGNORECASE,
+)
 
+
+def ghostty_theme_search_dirs() -> list[Path]:
+    dirs: list[Path] = []
+    xdg = os.environ.get("XDG_CONFIG_HOME", "").strip()
+    if xdg:
+        dirs.append(Path(xdg).expanduser() / "ghostty" / "themes")
+    dirs.append(Path.home() / ".config" / "ghostty" / "themes")
+
+    resources = os.environ.get("GHOSTTY_RESOURCES_DIR", "").strip()
+    if resources:
+        dirs.append(Path(resources).expanduser() / "themes")
+
+    if sys.platform == "darwin":
+        dirs.append(
+            Path("/Applications/Ghostty.app/Contents/Resources/ghostty/themes")
+        )
+
+    unique: list[Path] = []
+    for path in dirs:
+        if path.is_dir() and path not in unique:
+            unique.append(path)
+    return unique
+
+
+def find_ghostty_theme_file(theme_name: str) -> Path | None:
+    name = theme_name.strip()
+    if not name:
+        return None
+
+    for directory in ghostty_theme_search_dirs():
+        candidate = directory / name
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def parse_ghostty_config_text(text: str) -> dict:
     palette: dict[int, str] = {}
     parsed: dict[str, str | dict[int, str]] = {"palette": palette}
 
-    for raw_line in result.stdout.splitlines():
+    for raw_line in text.splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#"):
             continue
@@ -174,12 +208,66 @@ def load_ghostty_config(ghostty_cmd: str) -> dict:
                     palette[idx] = color
             continue
 
+        if key == "theme":
+            parsed["theme"] = value.strip().strip('"').strip("'")
+            continue
+
         if key in {"foreground", "background", "selection-background"}:
             color = normalize_hex(value)
             if color is not None:
                 parsed[key.replace("-", "_")] = color
 
     return parsed
+
+
+def load_ghostty_show_config(ghostty_cmd: str) -> dict:
+    try:
+        result = subprocess.run(
+            [ghostty_cmd, "+show-config"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return {}
+
+    return parse_ghostty_config_text(result.stdout)
+
+
+def resolve_theme_name_from_config(show_config: dict, appearance: str) -> str | None:
+    theme_value = show_config.get("theme")
+    if not isinstance(theme_value, str):
+        return None
+
+    pair = THEME_PAIR_RE.search(theme_value)
+    if not pair:
+        return None
+
+    light_name = pair.group(1).strip()
+    dark_name = pair.group(2).strip().rstrip(",")
+    if appearance == "dark":
+        return dark_name
+    if appearance == "light":
+        return light_name
+    return None
+
+
+def load_ghostty_config(ghostty_cmd: str, appearance: str = "auto") -> dict:
+    show_config = load_ghostty_show_config(ghostty_cmd)
+    if not show_config:
+        return {}
+
+    # `ghostty +show-config` reflects the light side of light:/dark: pairs on macOS.
+    if appearance in {"light", "dark"}:
+        theme_name = resolve_theme_name_from_config(show_config, appearance)
+        if theme_name:
+            theme_path = find_ghostty_theme_file(theme_name)
+            if theme_path is not None:
+                theme_parsed = parse_ghostty_config_text(theme_path.read_text())
+                if theme_parsed.get("palette") or theme_parsed.get("background"):
+                    return theme_parsed
+
+    return show_config
 
 
 def build_starship_palette(parsed: dict) -> dict[str, str]:
@@ -232,7 +320,10 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
         aqua = _ensure_dark_contrast(aqua)
         orange = _ensure_dark_contrast(orange)
     else:
-        # Light theme: boost saturation and darken colors for contrast on bright bg
+        # Light theme: keep Ghostty accent hues vivid; only nudge luminance when contrast is low.
+        yellow = colors.get(3) or yellow
+        orange = colors.get(11) or colors.get(3) or orange
+
         red = ensure_min_saturation_hsv(red, LIGHT_THEME_MIN_SATURATION)
         green = ensure_min_saturation_hsv(green, LIGHT_THEME_MIN_SATURATION)
         yellow = ensure_min_saturation_hsv(yellow, LIGHT_THEME_MIN_SATURATION)
@@ -243,13 +334,15 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
 
         def _ensure_light_contrast(c: str) -> str:
             cr = contrast_ratio(c, background)
-            if cr < LIGHT_ACCENT_MIN_CONTRAST:
-                # Darken: target luminance such that contrast ratio meets minimum
-                target_lum = (bg_lum + 0.05) / LIGHT_ACCENT_MIN_CONTRAST - 0.05
-                target_lum = min(target_lum, LIGHT_ACCENT_MAX_LUMINANCE)
-                target_lum = max(target_lum, 0.03)
-                return scale_luminance(c, target_lum)
-            return c
+            if cr >= LIGHT_ACCENT_MIN_CONTRAST:
+                lum = relative_luminance(c)
+                if lum <= LIGHT_ACCENT_MAX_LUMINANCE:
+                    return c
+                return scale_luminance(c, LIGHT_ACCENT_MAX_LUMINANCE)
+            target_lum = (bg_lum + 0.05) / LIGHT_ACCENT_MIN_CONTRAST - 0.05
+            target_lum = min(target_lum, LIGHT_ACCENT_MAX_LUMINANCE)
+            target_lum = max(target_lum, 0.06)
+            return scale_luminance(c, target_lum)
 
         red = _ensure_light_contrast(red)
         green = _ensure_light_contrast(green)
@@ -260,8 +353,13 @@ def build_starship_palette(parsed: dict) -> dict[str, str]:
         orange = _ensure_light_contrast(orange)
 
     # Offset bg1 from terminal background so prompt segments are visible
-    # Blend slightly toward foreground to create visual separation
-    prompt_bg = blend(background, foreground, 0.12)
+    if is_dark:
+        prompt_bg = blend(background, foreground, 0.12)
+    else:
+        neutral = colors.get(8) or foreground
+        prompt_bg = blend(background, neutral, LIGHT_PROMPT_BG_BLEND)
+        if contrast_ratio(prompt_bg, background) < 1.35:
+            prompt_bg = blend(background, foreground, LIGHT_PROMPT_BG_BLEND)
 
     contrast_candidates = [foreground, background, "#ffffff", "#000000"]
 
@@ -395,6 +493,12 @@ def main() -> int:
         default="ghostty",
         help="Ghostty executable name/path (default: ghostty)",
     )
+    parser.add_argument(
+        "--appearance",
+        choices=("auto", "light", "dark"),
+        default="auto",
+        help="macOS appearance for light:/dark: theme pairs (default: auto)",
+    )
     args = parser.parse_args()
 
     template_path = Path(args.template).expanduser()
@@ -403,7 +507,7 @@ def main() -> int:
     template_text = template_path.read_text()
     rendered = template_text
 
-    parsed = load_ghostty_config(args.ghostty_cmd)
+    parsed = load_ghostty_config(args.ghostty_cmd, appearance=args.appearance)
     if parsed:
         rendered = ensure_palette_name(rendered)
         rendered = update_palette_section(rendered, build_starship_palette(parsed))

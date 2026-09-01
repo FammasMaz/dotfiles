@@ -296,3 +296,7 @@ alias vim="nvim"
 # >>> grok installer >>>
 fish_add_path $HOME/.grok/bin
 # <<< grok installer <<<
+
+
+# SEM3D: old CPU install vs Metal GPU build
+alias sem3dmetal='/usr/local/bin/sem3dmetal'

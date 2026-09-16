@@ -265,16 +265,15 @@ if test -d "$local_config_dir"
     end
 end
 # AGENTS
-alias opencode="bunx opencode-ai@latest"
-alias opencode-tui="bunx opencode-ai@opentui"
-alias codex="bunx @openai/codex@latest"
+# alias opencode="bunx opencode-ai@latest"
+# alias opencode-tui="bunx opencode-ai@opentui"
 alias ccusage="bunx ccusage@latest"
-alias codexusage="bunx @ccusage/codex@latest"
+# alias codexusage="bunx @ccusage/codex@latest"
 # alias gemini="bunx @google/gemini-cli@latest"
-alias copilot="bunx @github/copilot@latest"
-alias cursor-cli="cursor-agent update && cursor-agent"
-alias uwu="uwu-cli"
-alias crush="bunx @charmland/crush@latest"
+# alias copilot="bunx @github/copilot@latest"
+# alias cursor-cli="cursor-agent update && cursor-agent"
+# alias uwu="uwu-cli"
+# alias crush="bunx @charmland/crush@latest"
 # alias pi="bunx @earendil-works/pi-coding-agent@latest"
 
 # alias for rsync

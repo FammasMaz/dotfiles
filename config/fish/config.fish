@@ -9,9 +9,6 @@ set -g fish_greeting ""
 if test -d /opt/homebrew/bin
     set -x PATH /opt/homebrew/bin $PATH
 end
-if test -d /opt/nanobrew/prefix/bin
-    set -x PATH /opt/nanobrew/prefix/bin $PATH
-end
 if test -d "$HOME/.local/bin"
     set -x PATH "$HOME/.local/bin" $PATH
 end
@@ -49,8 +46,13 @@ alias ghrepo='create-github-repo'
 if status is-interactive
     and not set -q CLAUDECODE
     and command -v zoxide >/dev/null 2>&1
+    # Regenerate when zoxide OR fish itself changes: the generated snippet embeds
+    # fish-version-specific paths (fish 4.9 dropped share/fish/functions, so an
+    # init cached under an older fish breaks every shell start).
     set -l _zoxide_cache "$HOME/.cache/zoxide/init.fish"
     if not test -f "$_zoxide_cache"
+        or test (command -v zoxide) -nt "$_zoxide_cache"
+        or test (command -v fish) -nt "$_zoxide_cache"
         mkdir -p (dirname "$_zoxide_cache")
         zoxide init fish --cmd cd >"$_zoxide_cache"
     end
@@ -110,8 +112,11 @@ if command -v starship >/dev/null 2>&1
     end
 
     # Cache starship full init output (the default is a lazy stub that re-invokes starship)
+    # Same staleness rule as the zoxide cache above.
     set -l _starship_cache "$HOME/.cache/starship/init.fish"
     if not test -f "$_starship_cache"
+        or test (command -v starship) -nt "$_starship_cache"
+        or test (command -v fish) -nt "$_starship_cache"
         mkdir -p (dirname "$_starship_cache")
         starship init fish --print-full-init >"$_starship_cache"
     end

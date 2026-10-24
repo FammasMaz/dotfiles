@@ -9,7 +9,6 @@ answers xterm color queries.
 from __future__ import annotations
 
 import argparse
-import colorsys
 import os
 import re
 import time
@@ -19,15 +18,12 @@ from pathlib import Path
 PALETTE_NAME = "terminal"
 HEX_RE = re.compile(r"^#([0-9a-fA-F]{6})$")
 
-DARK_BACKGROUND_LUMINANCE_THRESHOLD = 0.26
-DARK_THEME_MIN_SATURATION = 0.4
-DARK_ACCENT_MIN_CONTRAST = 3.5
-DARK_ACCENT_MAX_LUMINANCE = 0.45
-
-LIGHT_THEME_MIN_SATURATION = 0.52
-LIGHT_ACCENT_MIN_CONTRAST = 3.0
-LIGHT_ACCENT_MAX_LUMINANCE = 0.48
-LIGHT_PROMPT_BG_BLEND = 0.28
+# Segment fill = this much of the accent mixed into the terminal background.
+DARK_TINT = 0.28
+LIGHT_TINT = 0.20
+# Minimum WCAG contrast for segment text and for the prompt character.
+TEXT_MIN_CONTRAST = 4.5
+CHAR_MIN_CONTRAST = 3.0
 
 
 def normalize_hex(value: str) -> str | None:
@@ -62,15 +58,6 @@ def channel_to_linear(channel: int) -> float:
     return ((value + 0.055) / 1.055) ** 2.4
 
 
-def linear_to_channel(value: float) -> int:
-    value = max(0.0, min(1.0, value))
-    if value <= 0.0031308:
-        srgb = value * 12.92
-    else:
-        srgb = 1.055 * (value ** (1 / 2.4)) - 0.055
-    return round(srgb * 255)
-
-
 def relative_luminance(color: str) -> float:
     r, g, b = hex_to_rgb(color)
     rl = channel_to_linear(r)
@@ -87,66 +74,21 @@ def contrast_ratio(a: str, b: str) -> float:
     return (lighter + 0.05) / (darker + 0.05)
 
 
-def best_contrast_text(background: str, candidates: list[str]) -> str:
-    unique_candidates: list[str] = []
-    for color in candidates:
-        normalized = normalize_hex(color)
-        if normalized is not None and normalized not in unique_candidates:
-            unique_candidates.append(normalized)
-
-    if not unique_candidates:
-        return "#ffffff"
-
-    return max(unique_candidates, key=lambda color: contrast_ratio(background, color))
-
-
-def ensure_min_saturation_hsv(color: str, min_saturation: float) -> str:
-    if min_saturation <= 0.0:
-        return color
-
-    r8, g8, b8 = hex_to_rgb(color)
-    h, s, v = colorsys.rgb_to_hsv(r8 / 255, g8 / 255, b8 / 255)
-    boosted = colorsys.hsv_to_rgb(h, max(s, min(1.0, min_saturation)), v)
-    return rgb_to_hex(
-        (
-            round(boosted[0] * 255),
-            round(boosted[1] * 255),
-            round(boosted[2] * 255),
-        )
-    )
-
-
-def scale_luminance(color: str, target_lum: float) -> str:
-    """Scale a color to reach target luminance while preserving chromaticity."""
+def is_dark(color: str) -> bool:
+    """Same light/dark rule as termpalette and Neovim's 'background' detection."""
     r, g, b = hex_to_rgb(color)
-    rl = channel_to_linear(r)
-    gl = channel_to_linear(g)
-    bl = channel_to_linear(b)
-    current_lum = 0.2126 * rl + 0.7152 * gl + 0.0722 * bl
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5
 
-    if current_lum < 0.001:
-        return color
 
-    factor = target_lum / current_lum
-    new_r = rl * factor
-    new_g = gl * factor
-    new_b = bl * factor
-
-    # If any channel overflows, reduce factor to stay in gamut
-    max_val = max(new_r, new_g, new_b)
-    if max_val > 1.0:
-        factor /= max_val
-        new_r = rl * factor
-        new_g = gl * factor
-        new_b = bl * factor
-
-    return rgb_to_hex(
-        (
-            linear_to_channel(new_r),
-            linear_to_channel(new_g),
-            linear_to_channel(new_b),
-        )
-    )
+def readable(color: str, against: str, min_contrast: float) -> str:
+    """Move `color` toward white (dark `against`) or black (light) until it has
+    `min_contrast` against `against`. Colors that already pass are unchanged."""
+    target = "#ffffff" if is_dark(against) else "#000000"
+    out, t = color, 0.0
+    while contrast_ratio(out, against) < min_contrast and t < 1.0:
+        t = min(1.0, t + 0.04)
+        out = blend(color, target, t)
+    return out
 
 
 def parse_colors_arg(values: list[str]) -> dict:
@@ -222,129 +164,42 @@ def palette_key(colors: list[str]) -> str:
 
 
 def build_starship_palette(parsed: dict) -> dict[str, str]:
-    colors = parsed.get("palette", {})
+    """Tinted style: each segment is a soft tint of one of the theme's accents
+    over the terminal background, with its text in that accent. Colors come
+    straight from the theme; only lightness is adjusted, and only when needed
+    for contrast."""
+    c = parsed["palette"]
+    bg, fg = parsed["background"], parsed["foreground"]
+    dark = is_dark(bg)
 
-    foreground = parsed.get("foreground") or colors.get(7) or "#fbf1c7"
-    background = parsed.get("background") or colors.get(0) or "#3c3836"
-    selection_background = (
-        parsed.get("selection_background")
-        or colors.get(8)
-        or blend(background, foreground, 0.25)
-    )
+    accents = {"red": c[1], "green": c[2], "yellow": c[3], "blue": c[4], "purple": c[5], "aqua": c[6]}
+    accents["orange"] = blend(c[1], c[3], 0.5)
+    # Text color per segment: the bright variant on dark themes, the normal
+    # one on light themes (bright variants are usually lighter).
+    text = {"red": c[9], "green": c[10], "yellow": c[11], "blue": c[12], "purple": c[13], "aqua": c[14]}
+    text["orange"] = blend(c[9], c[11], 0.5)
+    if not dark:
+        text = dict(accents)
 
-    red = colors.get(1) or "#cc241d"
-    green = colors.get(2) or "#98971a"
-    yellow = colors.get(3) or "#d79921"
-    blue = colors.get(4) or "#458588"
-    purple = colors.get(5) or "#b16286"
-    aqua = colors.get(6) or "#689d6a"
-    orange = blend(red, yellow, 0.5)
-
-    bg_lum = relative_luminance(background)
-    is_dark = bg_lum < DARK_BACKGROUND_LUMINANCE_THRESHOLD
-
-    if is_dark:
-        red = ensure_min_saturation_hsv(red, DARK_THEME_MIN_SATURATION)
-        green = ensure_min_saturation_hsv(green, DARK_THEME_MIN_SATURATION)
-        yellow = ensure_min_saturation_hsv(yellow, DARK_THEME_MIN_SATURATION)
-        blue = ensure_min_saturation_hsv(blue, DARK_THEME_MIN_SATURATION)
-        purple = ensure_min_saturation_hsv(purple, DARK_THEME_MIN_SATURATION)
-        aqua = ensure_min_saturation_hsv(aqua, DARK_THEME_MIN_SATURATION)
-        orange = ensure_min_saturation_hsv(orange, DARK_THEME_MIN_SATURATION)
-
-        def _ensure_dark_contrast(c: str) -> str:
-            # Floor: ensure minimum contrast
-            if contrast_ratio(c, background) < DARK_ACCENT_MIN_CONTRAST:
-                target_lum = DARK_ACCENT_MIN_CONTRAST * (bg_lum + 0.05) - 0.05
-                target_lum = max(target_lum, 0.15)
-                c = scale_luminance(c, target_lum)
-            # Ceiling: cap luminance so accents aren't washed out / pastel
-            if relative_luminance(c) > DARK_ACCENT_MAX_LUMINANCE:
-                c = scale_luminance(c, DARK_ACCENT_MAX_LUMINANCE)
-            return c
-
-        red = _ensure_dark_contrast(red)
-        green = _ensure_dark_contrast(green)
-        yellow = _ensure_dark_contrast(yellow)
-        blue = _ensure_dark_contrast(blue)
-        purple = _ensure_dark_contrast(purple)
-        aqua = _ensure_dark_contrast(aqua)
-        orange = _ensure_dark_contrast(orange)
-    else:
-        # Light theme: keep Ghostty accent hues vivid; only nudge luminance when contrast is low.
-        yellow = colors.get(3) or yellow
-        orange = colors.get(11) or colors.get(3) or orange
-
-        red = ensure_min_saturation_hsv(red, LIGHT_THEME_MIN_SATURATION)
-        green = ensure_min_saturation_hsv(green, LIGHT_THEME_MIN_SATURATION)
-        yellow = ensure_min_saturation_hsv(yellow, LIGHT_THEME_MIN_SATURATION)
-        blue = ensure_min_saturation_hsv(blue, LIGHT_THEME_MIN_SATURATION)
-        purple = ensure_min_saturation_hsv(purple, LIGHT_THEME_MIN_SATURATION)
-        aqua = ensure_min_saturation_hsv(aqua, LIGHT_THEME_MIN_SATURATION)
-        orange = ensure_min_saturation_hsv(orange, LIGHT_THEME_MIN_SATURATION)
-
-        def _ensure_light_contrast(c: str) -> str:
-            cr = contrast_ratio(c, background)
-            if cr >= LIGHT_ACCENT_MIN_CONTRAST:
-                lum = relative_luminance(c)
-                if lum <= LIGHT_ACCENT_MAX_LUMINANCE:
-                    return c
-                return scale_luminance(c, LIGHT_ACCENT_MAX_LUMINANCE)
-            target_lum = (bg_lum + 0.05) / LIGHT_ACCENT_MIN_CONTRAST - 0.05
-            target_lum = min(target_lum, LIGHT_ACCENT_MAX_LUMINANCE)
-            target_lum = max(target_lum, 0.06)
-            return scale_luminance(c, target_lum)
-
-        red = _ensure_light_contrast(red)
-        green = _ensure_light_contrast(green)
-        yellow = _ensure_light_contrast(yellow)
-        blue = _ensure_light_contrast(blue)
-        purple = _ensure_light_contrast(purple)
-        aqua = _ensure_light_contrast(aqua)
-        orange = _ensure_light_contrast(orange)
-
-    # Offset bg1 from terminal background so prompt segments are visible
-    if is_dark:
-        prompt_bg = blend(background, foreground, 0.12)
-    else:
-        neutral = colors.get(8) or foreground
-        prompt_bg = blend(background, neutral, LIGHT_PROMPT_BG_BLEND)
-        if contrast_ratio(prompt_bg, background) < 1.35:
-            prompt_bg = blend(background, foreground, LIGHT_PROMPT_BG_BLEND)
-
-    contrast_candidates = [foreground, background, "#ffffff", "#000000"]
-
-    on_bg1 = best_contrast_text(prompt_bg, contrast_candidates)
-    on_bg3 = best_contrast_text(selection_background, contrast_candidates)
-    on_blue = best_contrast_text(blue, contrast_candidates)
-    on_aqua = best_contrast_text(aqua, contrast_candidates)
-    on_green = best_contrast_text(green, contrast_candidates)
-    on_orange = best_contrast_text(orange, contrast_candidates)
-    on_purple = best_contrast_text(purple, contrast_candidates)
-    on_red = best_contrast_text(red, contrast_candidates)
-    on_yellow = best_contrast_text(yellow, contrast_candidates)
-
-    return {
-        "color_fg0": foreground,
-        "color_bg1": prompt_bg,
-        "color_bg3": selection_background,
-        "color_on_bg1": on_bg1,
-        "color_on_bg3": on_bg3,
-        "color_on_blue": on_blue,
-        "color_on_aqua": on_aqua,
-        "color_on_green": on_green,
-        "color_on_orange": on_orange,
-        "color_on_purple": on_purple,
-        "color_on_red": on_red,
-        "color_on_yellow": on_yellow,
-        "color_blue": blue,
-        "color_aqua": aqua,
-        "color_green": green,
-        "color_orange": orange,
-        "color_purple": purple,
-        "color_red": red,
-        "color_yellow": yellow,
+    tint = DARK_TINT if dark else LIGHT_TINT
+    palette = {
+        "color_fg0": blend(bg, fg, 0.55),  # fill dots
+        "color_bg1": blend(bg, fg, 0.10),  # neutral segments (time, docker)
+        "color_bg3": blend(bg, fg, 0.18),  # conda/pixi
     }
+    palette["color_on_bg1"] = readable(fg, palette["color_bg1"], TEXT_MIN_CONTRAST)
+    palette["color_on_bg3"] = readable(fg, palette["color_bg3"], TEXT_MIN_CONTRAST)
+
+    for name, accent in accents.items():
+        fill = blend(bg, accent, tint)
+        palette[f"color_{name}"] = fill
+        palette[f"color_on_{name}"] = readable(text[name], fill, TEXT_MIN_CONTRAST)
+
+    # The prompt character sits on the terminal background, not on a tint.
+    for key, name in (("ok", "green"), ("err", "red"), ("replace", "purple"), ("visual", "yellow")):
+        palette[f"color_char_{key}"] = readable(text[name], bg, CHAR_MIN_CONTRAST)
+
+    return palette
 
 
 def ensure_palette_name(config_text: str) -> str:
@@ -463,9 +318,7 @@ def main() -> int:
     write_output(output_path, rendered)
 
     if args.output_dir:
-        # Same light/dark rule as termpalette and Neovim's 'background' detection.
-        r, g, b = hex_to_rgb(parsed["background"])
-        print(output_path, "dark" if (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5 else "light")
+        print(output_path, "dark" if is_dark(parsed["background"]) else "light")
     return 0
 
 

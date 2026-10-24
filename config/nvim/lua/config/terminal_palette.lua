@@ -240,6 +240,18 @@ function M.load()
       M.refresh()
     end,
   })
+
+  -- Switching between two themes of the same kind (e.g. one dark Rex theme to
+  -- another) sends no notification and leaves 'background' unchanged, so also
+  -- re-read the palette when the terminal regains focus.
+  vim.api.nvim_create_autocmd("FocusGained", {
+    group = augroup,
+    callback = function()
+      if vim.g.colors_name == "terminal" then
+        M.refresh()
+      end
+    end,
+  })
 end
 
 --- Re-query the terminal and re-apply if its colors changed.

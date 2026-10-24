@@ -142,6 +142,9 @@ is showing, and follow light/dark switches live.
 - Neovim's `terminal` colorscheme (`config/nvim/colors/terminal.lua`) does
   the same with mini.base16 and re-applies when Neovim re-detects
   `'background'`. It falls back to everforest if the terminal doesn't answer.
+- Switching between two themes of the same kind (e.g. two dark Rex themes)
+  sends no notification, so both also re-read the palette when the terminal
+  regains focus. fish enables focus reporting only while the prompt is shown.
 - Manual re-sync: `theme-sync` in fish, `:TerminalPaletteSync` in Neovim.
 
 ### 💻 VSCode/Cursor Configuration

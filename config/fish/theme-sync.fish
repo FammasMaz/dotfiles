@@ -67,6 +67,31 @@ function __theme_sync_on_change --on-variable fish_terminal_color_theme
     __theme_sync_apply; and commandline -f repaint
 end
 
+# Switching between two themes of the same kind (e.g. one dark Rex theme to
+# another, or a Ghostty config reload) sends no notification, so also re-read
+# the palette when the terminal regains focus: changing the theme means
+# clicking away to the settings and back. fish itself only enables focus
+# reporting under tmux, so turn it on while the prompt is showing and off while
+# a command runs (programs that don't expect focus events would see \e[I/\e[O).
+if test "$TERM" != dumb
+    function __theme_sync_focus_on --on-event fish_prompt
+        test -t 1; or return
+        printf '\e[?1004h'
+        set -g __theme_sync_focus_reporting
+    end
+    function __theme_sync_focus_off --on-event fish_preexec --on-event fish_exit
+        set -q __theme_sync_focus_reporting; or return
+        set -e __theme_sync_focus_reporting
+        printf '\e[?1004l'
+    end
+    function __theme_sync_on_focus --on-event fish_focus_in
+        set -l old $STARSHIP_CONFIG
+        __theme_sync_apply
+        and test "$STARSHIP_CONFIG" != "$old"
+        and commandline -f repaint
+    end
+end
+
 function theme-sync --description 'Re-read the terminal colors and regenerate the Starship palette'
     # Regenerate even if a cached file exists (e.g. after editing the template).
     set -l cached $__theme_sync_cache/*.toml

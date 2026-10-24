@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
+"""Generate a Starship config whose palette is derived from the terminal's colors.
+
+The colors come from the terminal itself (OSC 4/10/11 queries, see
+lib/termpalette.c), so this works in Ghostty, Rex, and any other terminal that
+answers xterm color queries.
+"""
+
+from __future__ import annotations
 
 import argparse
 import colorsys
 import os
 import re
-import subprocess
-import sys
+import time
 from pathlib import Path
 
 
-PALETTE_NAME = "ghostty_dynamic"
+PALETTE_NAME = "terminal"
 HEX_RE = re.compile(r"^#([0-9a-fA-F]{6})$")
-PALETTE_LINE_RE = re.compile(r"^(\d+)\s*=\s*(#[0-9a-fA-F]{6})$")
-KEY_VALUE_RE = re.compile(r"^([a-z0-9-]+)\s*=\s*(.+)$")
 
 DARK_BACKGROUND_LUMINANCE_THRESHOLD = 0.26
 DARK_THEME_MIN_SATURATION = 0.4
@@ -144,130 +149,76 @@ def scale_luminance(color: str, target_lum: float) -> str:
     )
 
 
-THEME_PAIR_RE = re.compile(
-    r"light\s*:\s*([^,]+?)\s*,\s*dark\s*:\s*(.+?)(?:\s*,\s*|$)",
-    re.IGNORECASE,
-)
+def parse_colors_arg(values: list[str]) -> dict:
+    """Turn `BG FG C0..C15` (termpalette output order) into the parsed-theme shape."""
+    colors = [normalize_hex(v) for v in values]
+    if len(colors) != 18 or any(c is None for c in colors):
+        raise SystemExit("--colors expects 18 #rrggbb values: BG FG C0..C15")
+    return {
+        "background": colors[0],
+        "foreground": colors[1],
+        "palette": {idx: color for idx, color in enumerate(colors[2:])},
+    }
 
 
-def ghostty_theme_search_dirs() -> list[Path]:
-    dirs: list[Path] = []
-    xdg = os.environ.get("XDG_CONFIG_HOME", "").strip()
-    if xdg:
-        dirs.append(Path(xdg).expanduser() / "ghostty" / "themes")
-    dirs.append(Path.home() / ".config" / "ghostty" / "themes")
+def query_terminal_colors(timeout: float = 0.5) -> list[str] | None:
+    """Python fallback for lib/termpalette.c (used when no C compiler is available)."""
+    import select
+    import termios
 
-    resources = os.environ.get("GHOSTTY_RESOURCES_DIR", "").strip()
-    if resources:
-        dirs.append(Path(resources).expanduser() / "themes")
-
-    if sys.platform == "darwin":
-        dirs.append(
-            Path("/Applications/Ghostty.app/Contents/Resources/ghostty/themes")
-        )
-
-    unique: list[Path] = []
-    for path in dirs:
-        if path.is_dir() and path not in unique:
-            unique.append(path)
-    return unique
-
-
-def find_ghostty_theme_file(theme_name: str) -> Path | None:
-    name = theme_name.strip()
-    if not name:
-        return None
-
-    for directory in ghostty_theme_search_dirs():
-        candidate = directory / name
-        if candidate.is_file():
-            return candidate
-    return None
-
-
-def parse_ghostty_config_text(text: str) -> dict:
-    palette: dict[int, str] = {}
-    parsed: dict[str, str | dict[int, str]] = {"palette": palette}
-
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#"):
-            continue
-
-        kv = KEY_VALUE_RE.match(line)
-        if not kv:
-            continue
-
-        key, value = kv.group(1), kv.group(2).strip()
-        if key == "palette":
-            palette_match = PALETTE_LINE_RE.match(value)
-            if palette_match:
-                idx = int(palette_match.group(1))
-                color = normalize_hex(palette_match.group(2))
-                if color is not None:
-                    palette[idx] = color
-            continue
-
-        if key == "theme":
-            parsed["theme"] = value.strip().strip('"').strip("'")
-            continue
-
-        if key in {"foreground", "background", "selection-background"}:
-            color = normalize_hex(value)
-            if color is not None:
-                parsed[key.replace("-", "_")] = color
-
-    return parsed
-
-
-def load_ghostty_show_config(ghostty_cmd: str) -> dict:
     try:
-        result = subprocess.run(
-            [ghostty_cmd, "+show-config"],
-            check=True,
-            capture_output=True,
-            text=True,
+        fd = os.open("/dev/tty", os.O_RDWR | os.O_NOCTTY)
+    except OSError:
+        return None
+    try:
+        saved = termios.tcgetattr(fd)
+        raw = termios.tcgetattr(fd)
+        raw[3] &= ~(termios.ICANON | termios.ECHO)
+        raw[6][termios.VMIN] = 0
+        raw[6][termios.VTIME] = 0
+        termios.tcsetattr(fd, termios.TCSANOW, raw)
+        try:
+            query = "".join(f"\033]4;{i};?\033\\" for i in range(16))
+            os.write(fd, (query + "\033]10;?\033\\\033]11;?\033\\\033[c").encode())
+            buf = b""
+            deadline = time.monotonic() + timeout
+            da1 = re.compile(rb"\033\[\?[0-9;]*c")
+            while not da1.search(buf):
+                left = deadline - time.monotonic()
+                if left <= 0 or not select.select([fd], [], [], left)[0]:
+                    break
+                buf += os.read(fd, 4096)
+        finally:
+            termios.tcsetattr(fd, termios.TCSANOW, saved)
+    finally:
+        os.close(fd)
+
+    def to_hex(spec: bytes) -> str:
+        parts = spec.split(b"/")[:3]
+        return "#" + "".join(
+            f"{round(int(p, 16) * 255 / (16 ** len(p) - 1)):02x}" for p in parts
         )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return {}
 
-    return parse_ghostty_config_text(result.stdout)
-
-
-def resolve_theme_name_from_config(show_config: dict, appearance: str) -> str | None:
-    theme_value = show_config.get("theme")
-    if not isinstance(theme_value, str):
+    slots: dict[int, str] = {}
+    osc = re.compile(rb"\033\](4;(\d+)|10|11);rgba?:([0-9a-fA-F]{1,4}/[0-9a-fA-F]{1,4}/[0-9a-fA-F]{1,4})")
+    for match in osc.finditer(buf):
+        if match.group(2) is not None:
+            slot = 2 + int(match.group(2))
+        else:
+            slot = 1 if match.group(1) == b"10" else 0
+        if 0 <= slot < 18:
+            slots.setdefault(slot, to_hex(match.group(3)))
+    if len(slots) != 18:
         return None
-
-    pair = THEME_PAIR_RE.search(theme_value)
-    if not pair:
-        return None
-
-    light_name = pair.group(1).strip()
-    dark_name = pair.group(2).strip().rstrip(",")
-    if appearance == "dark":
-        return dark_name
-    if appearance == "light":
-        return light_name
-    return None
+    return [slots[i] for i in range(18)]
 
 
-def load_ghostty_config(ghostty_cmd: str, appearance: str = "auto") -> dict:
-    show_config = load_ghostty_show_config(ghostty_cmd)
-    if not show_config:
-        return {}
-
-    # `ghostty +show-config` reflects the light side of light:/dark: pairs on macOS.
-    if appearance in {"light", "dark"}:
-        theme_name = resolve_theme_name_from_config(show_config, appearance)
-        if theme_name:
-            theme_path = find_ghostty_theme_file(theme_name)
-            if theme_path is not None:
-                theme_parsed = parse_ghostty_config_text(theme_path.read_text())
-                if theme_parsed.get("palette") or theme_parsed.get("background"):
-                    return theme_parsed
-
-    return show_config
+def palette_key(colors: list[str]) -> str:
+    """Same FNV-1a hash termpalette prints, so both paths share cache files."""
+    h = 2166136261
+    for byte in "".join(f" {c}" for c in colors).encode():
+        h = ((h ^ byte) * 16777619) & 0xFFFFFFFF
+    return f"{h:08x}"
 
 
 def build_starship_palette(parsed: dict) -> dict[str, str]:
@@ -471,48 +422,50 @@ def update_palette_section(config_text: str, values: dict[str, str]) -> str:
     return "\n".join(output) + "\n"
 
 
-def write_if_changed(path: Path, content: str) -> None:
+def write_output(path: Path, content: str) -> None:
+    # Always rewrite: callers use the file's mtime to decide whether to regenerate.
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() and path.read_text() == content:
-        return
-    path.write_text(content)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(content)
+    tmp.replace(path)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Generate Starship config with palette derived from Ghostty theme"
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--template", required=True, help="Starship template config")
+    out = parser.add_mutually_exclusive_group(required=True)
+    out.add_argument("--output", help="Generated Starship config path")
+    out.add_argument(
+        "--output-dir",
+        help="Write <dir>/<palette-hash>.toml and print '<path> <dark|light>'",
     )
-    parser.add_argument(
-        "--template", required=True, help="Path to Starship template config"
-    )
-    parser.add_argument(
-        "--output", required=True, help="Path to generated Starship config"
-    )
-    parser.add_argument(
-        "--ghostty-cmd",
-        default="ghostty",
-        help="Ghostty executable name/path (default: ghostty)",
-    )
-    parser.add_argument(
-        "--appearance",
-        choices=("auto", "light", "dark"),
-        default="auto",
-        help="macOS appearance for light:/dark: theme pairs (default: auto)",
-    )
+    src = parser.add_mutually_exclusive_group(required=True)
+    src.add_argument("--colors", nargs=18, metavar="HEX", help="BG FG C0..C15")
+    src.add_argument("--query", action="store_true", help="Query the terminal (/dev/tty)")
     args = parser.parse_args()
 
-    template_path = Path(args.template).expanduser()
-    output_path = Path(args.output).expanduser()
+    if args.colors:
+        colors = args.colors
+    else:
+        colors = query_terminal_colors()
+        if colors is None:
+            return 1
+    parsed = parse_colors_arg(colors)
 
-    template_text = template_path.read_text()
-    rendered = template_text
+    if args.output:
+        output_path = Path(args.output).expanduser()
+    else:
+        output_path = Path(args.output_dir).expanduser() / f"{palette_key(colors)}.toml"
 
-    parsed = load_ghostty_config(args.ghostty_cmd, appearance=args.appearance)
-    if parsed:
-        rendered = ensure_palette_name(rendered)
-        rendered = update_palette_section(rendered, build_starship_palette(parsed))
+    rendered = Path(args.template).expanduser().read_text()
+    rendered = ensure_palette_name(rendered)
+    rendered = update_palette_section(rendered, build_starship_palette(parsed))
+    write_output(output_path, rendered)
 
-    write_if_changed(output_path, rendered)
+    if args.output_dir:
+        # Same light/dark rule as termpalette and Neovim's 'background' detection.
+        r, g, b = hex_to_rgb(parsed["background"])
+        print(output_path, "dark" if (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5 else "light")
     return 0
 
 

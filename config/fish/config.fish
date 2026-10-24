@@ -17,10 +17,10 @@ if test -d "$HOME/.dotfiles/bin"
 end
 
 # Aliases
-# if macos use bat else batcat
-if test (uname) = Darwin
+# bat is installed as batcat on Debian/Ubuntu (command -q is a builtin lookup, no fork)
+if command -q bat
     alias cat='bat'
-else
+else if command -q batcat
     alias cat='batcat'
 end
 alias ghcp='gh copilot suggest'
@@ -60,56 +60,10 @@ if status is-interactive
 end
 
 # Starship prompt
-if command -v starship >/dev/null 2>&1
-    set -g __starship_sync_script "$HOME/.dotfiles/lib/sync_starship_ghostty_palette.py"
-    set -g __starship_template "$HOME/.config/starship/starship.toml"
-
-    # Detect macOS appearance mode → separate cache per mode
-    # Ghostty with light:/dark: themes changes colors on mode switch
-    # but config file timestamp stays the same → stale palette
-    set -l _appearance default
-    if type -q defaults
-        if defaults read -g AppleInterfaceStyle >/dev/null 2>&1
-            set _appearance dark
-        else
-            set _appearance light
-        end
-    end
-    set -g __starship_generated "$HOME/.cache/starship/starship.ghostty.$_appearance.toml"
-
-    # Re-sync when template, ghostty config, or appearance mode differs from cache
-    set -l ghostty_config "$HOME/.config/ghostty/config"
-    if command -v python3 >/dev/null 2>&1
-        and test -f "$__starship_sync_script"
-        and begin
-            not test -f "$__starship_generated"
-            or test "$__starship_template" -nt "$__starship_generated"
-            or test "$ghostty_config" -nt "$__starship_generated"
-            or test "$__starship_sync_script" -nt "$__starship_generated"
-        end
-        python3 "$__starship_sync_script" --template "$__starship_template" --output "$__starship_generated" --appearance "$_appearance" >/dev/null 2>&1
-    end
-
-    if test -f "$__starship_generated"
-        set -x STARSHIP_CONFIG "$__starship_generated"
-    else
-        set -x STARSHIP_CONFIG "$__starship_template"
-    end
-
-    # Manual sync command: run after changing ghostty theme
-    function sync-starship-theme --description "Re-sync starship palette from current Ghostty theme"
-        set -l _sync_appearance default
-        if type -q defaults
-            if defaults read -g AppleInterfaceStyle >/dev/null 2>&1
-                set _sync_appearance dark
-            else
-                set _sync_appearance light
-            end
-        end
-        python3 "$__starship_sync_script" --template "$__starship_template" --output "$HOME/.cache/starship/starship.ghostty.$_sync_appearance.toml" --appearance "$_sync_appearance"
-        and echo "Starship palette synced from Ghostty theme."
-        or echo "Failed to sync starship palette."
-    end
+if status is-interactive
+    and command -q starship
+    # Palette follows the terminal's real colors (Ghostty, Rex, ...); see theme-sync.fish
+    source (path dirname (path resolve (status filename)))/theme-sync.fish
 
     # Cache starship full init output (the default is a lazy stub that re-invokes starship)
     # Same staleness rule as the zoxide cache above.
@@ -117,10 +71,16 @@ if command -v starship >/dev/null 2>&1
     if not test -f "$_starship_cache"
         or test (command -v starship) -nt "$_starship_cache"
         or test (command -v fish) -nt "$_starship_cache"
-        mkdir -p (dirname "$_starship_cache")
+        mkdir -p (path dirname "$_starship_cache")
         starship init fish --print-full-init >"$_starship_cache"
     end
     source "$_starship_cache"
+
+    # The template has no right_format, so the right prompt would just spawn
+    # starship a second time per prompt to print nothing.
+    if not string match -qr '^\s*right_format\s*=' <$__theme_sync_template
+        functions -e fish_right_prompt
+    end
 end
 
 # OrbStack
@@ -163,18 +123,46 @@ function __title_join --description "join args with bullet"
     echo (string join " • " $out)
 end
 
+# fish_title runs before every prompt AND before every command, so it must not
+# spawn slow processes. Both helpers below use builtins only on the hot path.
 function __title_git
-    command -q git; or return
-    git rev-parse --is-inside-work-tree >/dev/null 2>&1; or return
-    set -l branch (command git symbolic-ref --quiet --short HEAD 2>/dev/null); or set branch (command git describe --tags --always 2>/dev/null)
-    test -n "$branch"; and echo "git:$branch"
+    # Find .git by walking up and read HEAD directly (no git process).
+    set -l dir $PWD
+    while not test -e $dir/.git
+        test "$dir" = /; and return
+        set dir (path dirname -- $dir)
+    end
+    set -l gitdir $dir/.git
+    if test -f $gitdir # worktree or submodule: "gitdir: <path>"
+        read -l line <$gitdir; or return
+        set gitdir (string replace -r '^gitdir:\s*' '' -- $line)
+        string match -q '/*' -- $gitdir; or set gitdir $dir/$gitdir
+    end
+    read -l head <$gitdir/HEAD 2>/dev/null; or return
+    if string match -q 'ref: refs/heads/*' -- $head
+        echo "git:"(string replace 'ref: refs/heads/' '' -- $head)
+    else
+        echo "git:"(string sub -l 7 -- $head)
+    end
 end
 
 function __title_k8s
-    command -q kubectl; or return
-    set -l ctx (kubectl config current-context 2>/dev/null); or return
-    set -l ns (kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
-    test -n "$ns"; and echo "k8s:$ctx:$ns"; or echo "k8s:$ctx"
+    # kubectl takes ~25 ms; only call it when the kubeconfig exists and changed.
+    set -l cfg (string split -m1 : -- "$KUBECONFIG")[1]
+    test -n "$cfg"; or set cfg ~/.kube/config
+    test -f "$cfg"; and command -q kubectl; or return
+    set -l stamp $cfg:(path mtime -- $cfg)
+    if test "$stamp" != "$__title_k8s_stamp"
+        set -g __title_k8s_stamp $stamp
+        set -g __title_k8s_value
+        set -l ctx (kubectl config current-context 2>/dev/null)
+        if test -n "$ctx"
+            set -l ns (kubectl config view --minify -o jsonpath='{..namespace}' 2>/dev/null)
+            set -g __title_k8s_value "k8s:$ctx"
+            test -n "$ns"; and set -g __title_k8s_value "k8s:$ctx:$ns"
+        end
+    end
+    test -n "$__title_k8s_value"; and echo $__title_k8s_value
 end
 
 function __title_aws
@@ -240,7 +228,7 @@ function fish_title
     set -l hostseg
     # Check for SSH connection using multiple methods
     if set -q SSH_TTY; or set -q SSH_CLIENT; or set -q SSH_CONNECTION
-        set hostseg (whoami)"@"(hostname -s)
+        set hostseg $USER"@"(prompt_hostname)
     end
     set -l tmuxseg
     if set -q TMUX

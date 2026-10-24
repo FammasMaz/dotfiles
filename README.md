@@ -121,9 +121,28 @@ If you want to add custom stuff in your local configs, add them to $HOME/.config
 ## Application Configurations
 
 ### 🖥️ Terminal (Ghostty)
-- **Theme**: Light (Material) / Dark (Vesper) with auto-switching
-- **Font**: CaskaydiaMono Nerd Font Mono for proper icon rendering
-- **Features**: Block cursor, shell integration, tabs-style titlebar
+- **Config**: `config/shared/ghostty/config`, linked to `~/.config/ghostty/config`
+- **Theme**: Light (Iceberg Light) / Dark (Jellybeans) with auto-switching
+- **Font**: GeistMono Nerd Font Mono for proper icon rendering
+- **Features**: Shell integration, tabs-style titlebar, translucent background
+
+### 🎨 Theme sync (Ghostty, Rex, any terminal)
+The Starship prompt and Neovim take their colors from the terminal itself, so
+they match whatever theme Ghostty or [Rex](https://www.superlogical.com/rex/docs/)
+is showing, and follow light/dark switches live.
+
+- `lib/termpalette.c` asks the terminal for its 16 ANSI colors plus fg/bg
+  (OSC 4/10/11, DA1 as the end marker). It's compiled into
+  `~/.cache/dotfiles/termpalette` on first shell start, and a call takes ~2 ms.
+- `config/fish/theme-sync.fish` turns that palette into a Starship config
+  (`lib/sync_starship_palette.py`, cached per palette in
+  `~/.cache/starship/palettes/`). When the terminal reports a theme change,
+  fish updates `$fish_terminal_color_theme` and the prompt is regenerated and
+  repainted.
+- Neovim's `terminal` colorscheme (`config/nvim/colors/terminal.lua`) does
+  the same with mini.base16 and re-applies when Neovim re-detects
+  `'background'`. It falls back to everforest if the terminal doesn't answer.
+- Manual re-sync: `theme-sync` in fish, `:TerminalPaletteSync` in Neovim.
 
 ### 💻 VSCode/Cursor Configuration
 - **Theme**: Vitesse Dark

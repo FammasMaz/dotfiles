@@ -2,7 +2,10 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "everforest",
+      -- Follow the terminal palette (Ghostty, Rex, ...); falls back to everforest.
+      colorscheme = function()
+        require("config.terminal_palette").load()
+      end,
     },
     init = function()
       vim.api.nvim_create_autocmd("ColorScheme", {
@@ -21,8 +24,12 @@ return {
             "TabLineFill",
           }
 
+          -- Clear only the background (keep fg/bold/etc.) so the terminal's
+          -- background, including its opacity/blur, shows through.
           for _, group in ipairs(groups) do
-            vim.api.nvim_set_hl(0, group, { bg = "none" })
+            local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+            hl.bg, hl.ctermbg = nil, nil
+            vim.api.nvim_set_hl(0, group, hl)
           end
         end,
       })

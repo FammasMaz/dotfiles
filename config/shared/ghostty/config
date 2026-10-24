@@ -1,9 +1,28 @@
-theme = light:material,dark:vesper
-font-family = "CaskaydiaMono Nerd Font Mono"
-cursor-style = block
-window-height = 30
-window-width = 120
-shell-integration = zsh
-shell-integration-features = no-cursor
+#keybind = shift+enter=text:\x1b\r
+#theme = Catppuccin Mocha
+theme = light:Iceberg Light, dark:Jellybeans
+#theme=Jellybeans
+# theme = light: Raycast Light,dark: iTerm2 Pastel Dark Background
+font-family = "GeistMono Nerd Font Mono"
+#font-family = "CaskaydiaCove Nerd Font"
+font-codepoint-map = U+2219,U+2722,U+2733,U+2736,U+273B,U+273D=DejaVu Sans Mono for Powerline
+#window-height = 40
+#window-width = 180
 macos-titlebar-style = tabs
+shell-integration = fish
+shell-integration-features = no-cursor,sudo, title
+background-blur = macos-glass-regular
+background-opacity = 0.5
+window-colorspace = display-p3
+window-padding-balance = true
+window-padding-x = 6
+window-padding-y = 4
+#scrollback-limit = 134217728
+#custom-shader = /Users/fammasmaz/.config/ghostty/shaders/cursor_smear_fade_tapered.glsl
 auto-update-channel = tip
+font-size=14
+#macos-icon= glass
+notify-on-command-finish=unfocused
+notify-on-command-finish-action=notify
+#custom-shader=/Users/fammasmaz/smoothscroll.gsl
+#custom-shader-animation = true

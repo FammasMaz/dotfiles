@@ -220,6 +220,11 @@ setup_shared_configs() {
         safe_symlink "$DOTFILES_DIR/config/starship/starship.toml" "$HOME/.config/starship/starship.toml"
     fi
 
+    # Setup Ghostty configuration (only the config file; themes/shaders stay local)
+    if [ -f "$DOTFILES_DIR/config/shared/ghostty/config" ]; then
+        safe_symlink "$DOTFILES_DIR/config/shared/ghostty/config" "$HOME/.config/ghostty/config"
+    fi
+
     log_success "Shared configurations setup completed"
 }
 
